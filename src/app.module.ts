@@ -5,6 +5,17 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import configuration from './config/configuration';
 import { FirebaseModule } from './firebase/firebase.module';
+import { randomUUID } from 'crypto';
+
+// Cloud Logging severity mapping
+const SEVERITY_LOOKUP = {
+  trace: 'DEBUG',
+  debug: 'DEBUG',
+  info: 'INFO',
+  warn: 'WARNING',
+  error: 'ERROR',
+  fatal: 'CRITICAL',
+};
 
 @Module({
   imports: [
@@ -22,6 +33,68 @@ import { FirebaseModule } from './firebase/firebase.module';
         return {
           pinoHttp: {
             level: logLevel,
+            messageKey: 'message',
+
+            // Cloud Logging 格式化
+            formatters: {
+              level(label: string) {
+                return {
+                  severity: SEVERITY_LOOKUP[label] || 'INFO',
+                };
+              },
+            },
+
+            // ISO8601 時間格式
+            timestamp: () => `,"time":"${new Date().toISOString()}"`,
+
+            // 生成 Request ID (支援上游傳遞的 ID)
+            genReqId: (req: any, res: any) => {
+              const existingID = req.id ?? req.headers['x-request-id'];
+              if (existingID) {
+                return existingID;
+              }
+              const id = randomUUID();
+              req.headers['x-request-id'] = id;
+              res.setHeader('X-Request-ID', id);
+              return id;
+            },
+
+            // 自定義屬性（如用戶信息）
+            customProps: (req: any) => {
+              const props: any = {};
+              if (req.user) {
+                props.user = {
+                  uid: req.user.uid,
+                  email: req.user.email,
+                };
+              }
+              return props;
+            },
+
+            // 自定義日誌級別
+            customLogLevel: (req, res, err) => {
+              if (res.statusCode >= 400 && res.statusCode < 500) return 'warn';
+              if (res.statusCode >= 500 || err) return 'error';
+              return 'info';
+            },
+
+            // 自定義序列化器
+            serializers: {
+              req: (req: any) => ({
+                method: req.method,
+                url: req.url,
+                headers: {
+                  'user-agent': req.headers['user-agent'],
+                  'accept': req.headers['accept'],
+                  'x-request-id': req.headers['x-request-id'],
+                },
+              }),
+              res: (res: any) => ({
+                statusCode: res.statusCode,
+              }),
+            },
+
+            // 開發環境使用 pino-pretty
             transport: isDevelopment
               ? {
                   target: 'pino-pretty',
@@ -34,11 +107,6 @@ import { FirebaseModule } from './firebase/firebase.module';
                 }
               : undefined,
             autoLogging: true,
-            customLogLevel: (req, res, err) => {
-              if (res.statusCode >= 400 && res.statusCode < 500) return 'warn';
-              if (res.statusCode >= 500 || err) return 'error';
-              return 'info';
-            },
           },
         };
       },

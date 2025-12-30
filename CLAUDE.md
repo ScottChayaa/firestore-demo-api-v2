@@ -29,6 +29,31 @@ git commit -m "docs: 更新 API 文件"
 - ✅ 使用簡潔清晰的中文 commit message
 
 
+## 📁 專案結構規範
+
+### 1. 檔案位置規範
+
+**測試腳本和工具**：
+- ✅ 所有測試腳本放在 `scripts/` 目錄下
+- ✅ 文檔放在專案根目錄（如 `README.md`, `SETUP.md`, `LOG_TEST.md`）
+- ❌ 不要將測試腳本（`.sh`, `.js` 等）直接放在根目錄
+
+**目錄結構**：
+```
+firestore-demo-api-v2/
+├── scripts/           # 測試腳本、工具腳本
+│   ├── test-log.sh
+│   └── ...
+├── src/               # 原始碼
+├── todolist/          # 任務規劃文檔
+├── README.md          # 專案說明
+├── SETUP.md           # 快速設置指南
+├── LOG_TEST.md        # 測試文檔
+└── ...
+```
+
+---
+
 ## 🔐 安全性考量
 
 ### 1. 環境變數保護
