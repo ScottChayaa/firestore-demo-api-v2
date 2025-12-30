@@ -1,0 +1,74 @@
+# compiled output
+/dist
+/node_modules
+
+# Logs
+logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# OS
+.DS_Store
+
+# Tests
+/coverage
+/.nyc_output
+
+# IDEs and editors
+/.idea
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+
+# IDE - VSCode
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# Environment
+.env
+.env.*
+!.env.example
+env.yaml
+env.*.yaml
+!env.example.yaml
+
+# Firebase
+firebase-service-account.json
+firebase-service-account-*.json
+firebase-service-account.*.json
+*-service-account.json
+.firebase/
+encoded.txt
+encoded.*.txt
+
+# Firestore
+missing-indexes.json
+missing-*-indexes.json
+
+# Rest API
+*.rest
+!private.example.rest
+!public.example.rest
+!admin.example.rest
+!member.example.rest
+
+# Claude Code
+.claude/
+.mcp.json
+
+# Temporary files
+tmp/
+*.tmp
+*.bak
+*.swp
+*~.nib

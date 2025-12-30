@@ -1,0 +1,17 @@
+node_modules
+npm-debug.log
+dist
+.git
+.gitignore
+README.md
+.env
+env.yaml
+firebase-service-account.json
+*-service-account.json
+tmp
+*.tmp
+.DS_Store
+coverage
+.vscode
+.idea
+todolist
