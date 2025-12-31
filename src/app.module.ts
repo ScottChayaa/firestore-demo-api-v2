@@ -7,6 +7,7 @@ import configuration from './config/configuration';
 import { FirebaseModule } from './firebase/firebase.module';
 import { AuthModule } from './auth/auth.module';
 import { ProductsModule } from './products/products.module';
+import { MembersModule } from './members/members.module';
 import { randomUUID } from 'crypto';
 
 // Cloud Logging severity mapping
@@ -116,6 +117,7 @@ const SEVERITY_LOOKUP = {
     FirebaseModule,
     AuthModule,
     ProductsModule,
+    MembersModule,
   ],
   controllers: [AppController],
   providers: [AppService],
