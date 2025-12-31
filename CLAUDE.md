@@ -6,15 +6,15 @@
 
 1. 先檢查當前 Git 狀態
 2. 創建有意義的 commit message（使用中文或英文）
-3. Commit message 格式：`[類型] 簡短描述`
+3. Commit message 格式：`類型: 簡短描述`
 
 **類型範例**：
-- `feat` ：新功能
-- `fix` ：錯誤修復
-- `refactor` ：程式碼重構
-- `docs` ：文件更新
-- `test` ：測試相關
-- `chore` ：建置工具、依賴更新等
+- `feat`：新功能
+- `fix`：錯誤修復
+- `refactor`：程式碼重構
+- `docs`：文件更新
+- `test`：測試相關
+- `chore`：建置工具、依賴更新等
 
 **範例**：
 ```bash
