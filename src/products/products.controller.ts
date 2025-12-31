@@ -2,7 +2,7 @@ import { Controller, Get, Param, Query, Req } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { ProductQueryDto } from './dto/product-query.dto';
 import { Public } from '../common/decorators/public.decorator';
-import { PinoLogger, InjectPinoLogger } from 'nestjs-pino';
+import { PinoLogger } from 'nestjs-pino';
 
 @Controller('products')
 export class ProductsController {

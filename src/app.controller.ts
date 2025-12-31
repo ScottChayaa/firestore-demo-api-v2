@@ -1,7 +1,7 @@
 import { Controller, Get, Post, Body, Param, Req } from '@nestjs/common';
 import { AppService } from './app.service';
 import { Public } from './common/decorators/public.decorator';
-import { PinoLogger, InjectPinoLogger } from 'nestjs-pino';
+import { PinoLogger } from 'nestjs-pino';
 
 @Controller()
 export class AppController {

@@ -4,13 +4,12 @@ import { RegisterDto } from './dto/register.dto';
 import { SignInDto } from './dto/sign-in.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { Public } from '../common/decorators/public.decorator';
-import { PinoLogger, InjectPinoLogger } from 'nestjs-pino';
+import { PinoLogger } from 'nestjs-pino';
 
 @Controller('auth')
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
-    @InjectPinoLogger(AuthController.name)
     private readonly logger: PinoLogger,
   ) {}
 
