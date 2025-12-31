@@ -48,7 +48,6 @@ firestore-demo-api-v2/
 ├── todolist/          # 任務規劃文檔
 ├── README.md          # 專案說明
 ├── SETUP.md           # 快速設置指南
-├── LOG_TEST.md        # 測試文檔
 └── ...
 ```
 
