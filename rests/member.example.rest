@@ -1,0 +1,86 @@
+@baseUrl = http://localhost:8080
+@contentType = application/json
+@memberToken = Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6IjQ1YTZjMGMyYjgwMDcxN2EzNGQ1Y2JiYmYzOWI4NGI2NzYxMjgyNjUiLCJ0eXAiOiJKV1QifQ.eyJuYW1lIjoi6JiL5p6cIiwibG9naW5BcyI6Im1lbWJlciIsImlzcyI6Imh0dHBzOi8vc2VjdXJldG9rZW4uZ29vZ2xlLmNvbS9saWFuZy1kZXYiLCJhdWQiOiJsaWFuZy1kZXYiLCJhdXRoX3RpbWUiOjE3NjQxNDg5NTYsInVzZXJfaWQiOiJ3b09HRkVSbXpTYVhBVHBXMks4dGRYTzNvS3AyIiwic3ViIjoid29PR0ZFUm16U2FYQVRwVzJLOHRkWE8zb0twMiIsImlhdCI6MTc2NDE0ODk1NiwiZXhwIjoxNzY0MTUyNTU2LCJlbWFpbCI6ImFwcGxlQGV4YW1wbGUuY29tIiwiZW1haWxfdmVyaWZpZWQiOmZhbHNlLCJmaXJlYmFzZSI6eyJpZGVudGl0aWVzIjp7ImVtYWlsIjpbImFwcGxlQGV4YW1wbGUuY29tIl19LCJzaWduX2luX3Byb3ZpZGVyIjoiY3VzdG9tIn19.gA3h3lCbIHGQ1YGN3u9WLH_XUmZQnfx--vfMehUKK8sk2_rbRYsvv8SzkRWHT5FG09I5y6BUheNgZ61TvVHcetHYcVzrhQPSZ48X2U2O0w3DXQgHiSrLaXeAzyY1Kl7DIDsrrO4Ggp2ZEwuhRZxKltfx7kQkrMidThh1rSv4WyLwhYbCvHg-9bqDZlOE67wI5q3ZxRIxOyb5PhfvX8OAfQyJGcQ5AyiGkFQdgo8TEC0TQZYoMpLnnrLBIEJVqdvbarru5aOmgMZUlqRSunCkq4WVz9ft1mg6RSdT4FOA6XEtDzdarh5UakgjDW9n-xp1UfwDpQInpZ3L0cFa2MiZdA
+
+### ============================================
+### 會員個人資料 - 取得自己的資料
+### ============================================
+GET {{baseUrl}}/api/member
+Content-Type: {{contentType}}
+Authorization: {{memberToken}}
+
+### ============================================
+### 會員個人資料 - 更新自己的資料
+### ============================================
+PUT {{baseUrl}}/api/member
+Content-Type: {{contentType}}
+Authorization: {{memberToken}}
+
+{
+  "name": "蘋果人",
+  "phone": "0987654322"
+}
+
+### ============================================
+### 會員訂單 - 查看自己的訂單（基本）
+### ============================================
+GET {{baseUrl}}/api/member/orders
+Content-Type: {{contentType}}
+Authorization: {{memberToken}}
+
+### ============================================
+### 會員訂單 - 查看自己的訂單（分頁）
+### ============================================
+GET {{baseUrl}}/api/member/orders?limit=5
+Content-Type: {{contentType}}
+Authorization: {{memberToken}}
+
+### ============================================
+### 會員訂單 - 查看自己的訂單（游標分頁）
+### ============================================
+GET {{baseUrl}}/api/member/orders?limit=3&cursor=GpLAnlspHnvvqSKEi9Wi
+Content-Type: {{contentType}}
+Authorization: {{memberToken}}
+
+### ============================================
+### 會員訂單 - 查看自己的訂單（狀態篩選）
+### ============================================
+GET {{baseUrl}}/api/member/orders?status=pending
+Content-Type: {{contentType}}
+Authorization: {{memberToken}}
+###
+GET {{baseUrl}}/api/member/orders?status=completed22222
+Content-Type: {{contentType}}
+Authorization: {{memberToken}}
+
+### ============================================
+### 會員訂單 - 查看自己的訂單（日期範圍）
+### ============================================
+GET {{baseUrl}}/api/member/orders?minCreatedAt=2025-01-01&maxCreatedAt=2025-12-31
+Content-Type: {{contentType}}
+Authorization: {{memberToken}}
+
+### ============================================
+### 會員訂單 - 查看自己的訂單（金額範圍）
+### ============================================
+GET {{baseUrl}}/api/member/orders?minAmount=100&maxAmount=5000
+Content-Type: {{contentType}}
+Authorization: {{memberToken}}
+
+### ============================================
+### 會員訂單 - 查看自己的訂單（排序）
+### ============================================
+GET {{baseUrl}}/api/member/orders?orderBy=totalAmount&order=asc
+Content-Type: {{contentType}}
+Authorization: {{memberToken}}
+###
+GET {{baseUrl}}/api/member/orders?orderBy=totalAmount&order=desc
+Content-Type: {{contentType}}
+Authorization: {{memberToken}}
+
+### ============================================
+### 會員訂單 - 查看自己的訂單（複合條件）
+### ============================================
+GET {{baseUrl}}/api/member/orders?status=completed&orderBy=totalAmount&order=asc
+Content-Type: {{contentType}}
+Authorization: {{memberToken}}

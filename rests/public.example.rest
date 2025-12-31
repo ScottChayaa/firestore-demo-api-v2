@@ -1,0 +1,96 @@
+@baseUrl = http://localhost:8080
+@contentType = application/json
+
+### ============================================
+### 根路徑
+### ============================================
+GET {{baseUrl}}/
+###
+GET {{baseUrl}}/health
+
+### ============================================
+### 註冊
+### ============================================
+POST {{baseUrl}}/api/auth/register
+Content-Type: {{contentType}}
+
+{
+  "email": "apple@example.com",
+  "password": "qwer1234",
+  "name": "蘋果",
+  "phone": "0912345678"
+}
+
+### ============================================
+### 會員登入（Email/Password 直接取得含會員角色的 ID Token）
+### ============================================
+POST {{baseUrl}}/api/auth/member/signInWithPassword
+Content-Type: {{contentType}}
+
+{
+  "email": "apple@example.com",
+  "password": "qwer1234"
+}
+
+### ============================================
+### 會員忘記密碼（新 API - 會發送郵件）
+###  - 有頻率限制（2 分鐘內）
+### ============================================
+POST {{baseUrl}}/api/auth/forgot-password
+Content-Type: {{contentType}}
+
+{
+  "email": "apple@example.com"
+}
+
+### ============================================
+### 商品列表（支援分頁和篩選）
+### ============================================
+GET {{baseUrl}}/api/products?limit=3
+Content-Type: {{contentType}}
+### 排序asc
+GET {{baseUrl}}/api/products?order=asc
+### 排序desc
+GET {{baseUrl}}/api/products?order=desc
+Content-Type: {{contentType}}
+### 篩選: 商品分類, 排序: 時間desc
+GET {{baseUrl}}/api/products?category=electronics&orderBy=createdAt&order=desc
+### 篩選: 商品分類, 排序: 時間asc
+GET {{baseUrl}}/api/products?category=electronics&orderBy=createdAt&order=asc
+Content-Type: {{contentType}}
+### 篩選: 價格範圍, 排序: 時間desc
+GET {{baseUrl}}/api/products?minPrice=10&maxPrice=9999&orderBy=price&order=desc
+Content-Type: {{contentType}}
+### 篩選: 價格範圍, 排序: 時間asc
+GET {{baseUrl}}/api/products?minPrice=10&maxPrice=9999&orderBy=price&order=asc
+Content-Type: {{contentType}}
+### 篩選: 價格範圍, 排序: 價格asc
+GET {{baseUrl}}/api/products?minPrice=10&maxPrice=9999&orderBy=price&order=asc
+Content-Type: {{contentType}}
+### 商品列表: 測試
+GET {{baseUrl}}/api/products?minPrice=11&maxPrice=9999&orderBy=price&order=asc
+Content-Type: {{contentType}}
+
+### ============================================
+### 商品分類列表
+### ============================================
+GET {{baseUrl}}/api/products/categories
+Content-Type: {{contentType}}
+
+### ============================================
+### 取得單一商品詳情
+### ============================================
+GET {{baseUrl}}/api/products/pzjNPjsFrmsagdO750lG
+Content-Type: {{contentType}}
+
+### ============================================
+### 寄信
+### ============================================
+POST {{baseUrl}}/send-email
+Content-Type: {{contentType}}
+
+{
+  "to": "apple@example.com",
+  "subject": "😍TEST Email",
+  "html": "<b>Hello world</b>"
+}

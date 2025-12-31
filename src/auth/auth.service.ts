@@ -18,7 +18,7 @@ export class AuthService {
 
   constructor(
     @Inject('FIREBASE_APP') private firebaseApp: admin.app.App,
-    @Inject('FIRESTORE') private firestore: FirebaseFirestore.Firestore,
+    @Inject('FIRESTORE') private firestore: admin.firestore.Firestore,
     private configService: ConfigService,
   ) {
     this.webApiKey = this.configService.get<string>('firebase.webApiKey');
