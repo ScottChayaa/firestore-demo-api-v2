@@ -7,6 +7,17 @@
 GET {{baseUrl}}/api/hello
 ###
 GET {{baseUrl}}/api/health
+###
+POST {{baseUrl}}/api/test/echo
+Content-Type: {{contentType}}
+
+{
+  "email": "apple@example.com",
+  "name": "蘋果",
+  "phone": "0912345678"
+}
+###
+GET {{baseUrl}}/api/test/users/112233
 
 ### ============================================
 ### 註冊
