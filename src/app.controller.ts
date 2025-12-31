@@ -7,7 +7,6 @@ import { PinoLogger, InjectPinoLogger } from 'nestjs-pino';
 export class AppController {
   constructor(
     private readonly appService: AppService,
-    @InjectPinoLogger(AppController.name)
     private readonly logger: PinoLogger,
   ) {}
 
@@ -26,6 +25,8 @@ export class AppController {
   @Public()
   @Get('health')
   getHealth() {
+    this.logger.debug('This is debug level');
+
     return {
       status: 'ok',
       timestamp: new Date().toISOString(),

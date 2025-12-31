@@ -8,7 +8,6 @@ import { PinoLogger, InjectPinoLogger } from 'nestjs-pino';
 export class ProductsController {
   constructor(
     private readonly productsService: ProductsService,
-    @InjectPinoLogger(ProductsController.name)
     private readonly logger: PinoLogger,
   ) {}
 
