@@ -1,19 +1,24 @@
 import { Controller, Get, Post, Body, Param, Req } from '@nestjs/common';
 import { AppService } from './app.service';
 import { Public } from './common/decorators/public.decorator';
+import { PinoLogger, InjectPinoLogger } from 'nestjs-pino';
 
 @Controller()
 export class AppController {
-  constructor(private readonly appService: AppService) {}
+  constructor(
+    private readonly appService: AppService,
+    @InjectPinoLogger(AppController.name)
+    private readonly logger: PinoLogger,
+  ) {}
 
   @Public()
   @Get()
-  getRoot(@Req() req: any) {
-    // 測試不同日誌級別（使用可選鏈避免錯誤）
-    req.log?.trace('This is trace level');
-    req.log?.debug('This is debug level');
-    req.log?.info({ message: 'Root endpoint accessed', details: ['test', 'data'] });
-    req.log?.warn('This is warning level');
+  getRoot() {
+    // 測試不同日誌級別（PinoLogger 自動包含 reqId）
+    this.logger.trace('This is trace level');
+    this.logger.debug('This is debug level');
+    this.logger.info({ message: 'Root endpoint accessed', details: ['test', 'data'] });
+    this.logger.warn('This is warning level');
 
     return this.appService.getHello();
   }
@@ -31,7 +36,7 @@ export class AppController {
   @Public()
   @Post('test/echo')
   testEcho(@Body() body: any, @Req() req: any) {
-    req.log?.info({ body }, 'Echo request received');
+    this.logger.info({ body }, 'Echo request received');
     return {
       message: 'Echo response',
       receivedBody: body,
@@ -44,7 +49,7 @@ export class AppController {
   @Public()
   @Get('test/users/:userId')
   testGetUser(@Param('userId') userId: string, @Req() req: any) {
-    req.log?.info({ userId }, 'Get user by ID');
+    this.logger.info({ userId }, 'Get user by ID');
     return {
       message: 'User details',
       userId,
@@ -61,7 +66,7 @@ export class AppController {
     @Param('orderId') orderId: string,
     @Req() req: any,
   ) {
-    req.log?.info({ userId, orderId }, 'Get user order');
+    this.logger.info({ userId, orderId }, 'Get user order');
     return {
       message: 'Order details',
       userId,
@@ -74,16 +79,16 @@ export class AppController {
   // 測試錯誤處理 (400)
   @Public()
   @Get('test/error/400')
-  testError400(@Req() req: any) {
-    req.log?.warn('Testing 400 error');
+  testError400() {
+    this.logger.warn('Testing 400 error');
     throw new Error('Bad Request Test');
   }
 
   // 測試錯誤處理 (500)
   @Public()
   @Get('test/error/500')
-  testError500(@Req() req: any) {
-    req.log?.error('Testing 500 error');
+  testError500() {
+    this.logger.error('Testing 500 error');
     throw new Error('Internal Server Error Test');
   }
 }

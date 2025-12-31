@@ -4,10 +4,15 @@ import { RegisterDto } from './dto/register.dto';
 import { SignInDto } from './dto/sign-in.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { Public } from '../common/decorators/public.decorator';
+import { PinoLogger, InjectPinoLogger } from 'nestjs-pino';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    @InjectPinoLogger(AuthController.name)
+    private readonly logger: PinoLogger,
+  ) {}
 
   /**
    * 會員註冊
@@ -15,10 +20,10 @@ export class AuthController {
    */
   @Public()
   @Post('register')
-  async register(@Body() registerDto: RegisterDto, @Req() req: any) {
-    req.log?.info({ email: registerDto.email }, '會員註冊請求');
+  async register(@Body() registerDto: RegisterDto) {
+    this.logger.info({ email: registerDto.email }, '會員註冊請求');
     const result = await this.authService.register(registerDto);
-    req.log?.info({ uid: result.uid }, '會員註冊成功');
+    this.logger.info({ uid: result.uid }, '會員註冊成功');
     return result;
   }
 
@@ -28,10 +33,10 @@ export class AuthController {
    */
   @Public()
   @Post('member/signInWithPassword')
-  async memberSignIn(@Body() signInDto: SignInDto, @Req() req: any) {
-    req.log?.info({ email: signInDto.email }, '會員登入請求');
+  async memberSignIn(@Body() signInDto: SignInDto) {
+    this.logger.info({ email: signInDto.email }, '會員登入請求');
     const result = await this.authService.signIn(signInDto);
-    req.log?.info({ uid: result.uid }, '會員登入成功');
+    this.logger.info({ uid: result.uid }, '會員登入成功');
     return result;
   }
 
@@ -41,10 +46,10 @@ export class AuthController {
    */
   @Public()
   @Post('admin/signInWithPassword')
-  async adminSignIn(@Body() signInDto: SignInDto, @Req() req: any) {
-    req.log?.info({ email: signInDto.email }, '管理員登入請求');
+  async adminSignIn(@Body() signInDto: SignInDto) {
+    this.logger.info({ email: signInDto.email }, '管理員登入請求');
     const result = await this.authService.adminSignIn(signInDto);
-    req.log?.info({ uid: result.uid }, '管理員登入成功');
+    this.logger.info({ uid: result.uid }, '管理員登入成功');
     return result;
   }
 
@@ -54,10 +59,10 @@ export class AuthController {
    */
   @Public()
   @Post('forgot-password')
-  async forgotPassword(@Body() forgotPasswordDto: ForgotPasswordDto, @Req() req: any) {
-    req.log?.info({ email: forgotPasswordDto.email }, '忘記密碼請求');
+  async forgotPassword(@Body() forgotPasswordDto: ForgotPasswordDto) {
+    this.logger.info({ email: forgotPasswordDto.email }, '忘記密碼請求');
     const result = await this.authService.forgotPassword(forgotPasswordDto);
-    req.log?.info({ email: forgotPasswordDto.email }, '密碼重設郵件已發送');
+    this.logger.info({ email: forgotPasswordDto.email }, '密碼重設郵件已發送');
     return result;
   }
 }
