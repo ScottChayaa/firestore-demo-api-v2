@@ -9,11 +9,11 @@ export class AppController {
   @Public()
   @Get()
   getRoot(@Req() req: any) {
-    // 測試不同日誌級別
-    req.log.trace('This is trace level');
-    req.log.debug('This is debug level');
-    req.log.info({ message: 'Root endpoint accessed', details: ['test', 'data'] });
-    req.log.warn('This is warning level');
+    // 測試不同日誌級別（使用可選鏈避免錯誤）
+    req.log?.trace('This is trace level');
+    req.log?.debug('This is debug level');
+    req.log?.info({ message: 'Root endpoint accessed', details: ['test', 'data'] });
+    req.log?.warn('This is warning level');
 
     return this.appService.getHello();
   }
@@ -31,7 +31,7 @@ export class AppController {
   @Public()
   @Post('test/echo')
   testEcho(@Body() body: any, @Req() req: any) {
-    req.log.info({ body }, 'Echo request received');
+    req.log?.info({ body }, 'Echo request received');
     return {
       message: 'Echo response',
       receivedBody: body,
@@ -44,7 +44,7 @@ export class AppController {
   @Public()
   @Get('test/users/:userId')
   testGetUser(@Param('userId') userId: string, @Req() req: any) {
-    req.log.info({ userId }, 'Get user by ID');
+    req.log?.info({ userId }, 'Get user by ID');
     return {
       message: 'User details',
       userId,
@@ -61,7 +61,7 @@ export class AppController {
     @Param('orderId') orderId: string,
     @Req() req: any,
   ) {
-    req.log.info({ userId, orderId }, 'Get user order');
+    req.log?.info({ userId, orderId }, 'Get user order');
     return {
       message: 'Order details',
       userId,
@@ -75,7 +75,7 @@ export class AppController {
   @Public()
   @Get('test/error/400')
   testError400(@Req() req: any) {
-    req.log.warn('Testing 400 error');
+    req.log?.warn('Testing 400 error');
     throw new Error('Bad Request Test');
   }
 
@@ -83,7 +83,7 @@ export class AppController {
   @Public()
   @Get('test/error/500')
   testError500(@Req() req: any) {
-    req.log.error('Testing 500 error');
+    req.log?.error('Testing 500 error');
     throw new Error('Internal Server Error Test');
   }
 }
