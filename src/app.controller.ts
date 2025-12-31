@@ -13,7 +13,7 @@ export class AppController {
   @Public()
   @Get()
   getRoot() {
-    // 測試不同日誌級別（PinoLogger 自動包含 reqId）
+    // 測試不同日誌級別
     this.logger.trace('This is trace level');
     this.logger.debug('This is debug level');
     this.logger.info({ message: 'Root endpoint accessed', details: ['test', 'data'] });
