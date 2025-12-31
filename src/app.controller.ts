@@ -11,7 +11,7 @@ export class AppController {
   ) {}
 
   @Public()
-  @Get()
+  @Get('hello')
   getRoot() {
     // 測試不同日誌級別
     this.logger.trace('This is trace level');
@@ -41,7 +41,6 @@ export class AppController {
     return {
       message: 'Echo response',
       receivedBody: body,
-      requestId: req.headers['x-request-id'],
       timestamp: new Date().toISOString(),
     };
   }
@@ -54,7 +53,6 @@ export class AppController {
     return {
       message: 'User details',
       userId,
-      requestId: req.headers['x-request-id'],
       timestamp: new Date().toISOString(),
     };
   }
@@ -72,7 +70,6 @@ export class AppController {
       message: 'Order details',
       userId,
       orderId,
-      requestId: req.headers['x-request-id'],
       timestamp: new Date().toISOString(),
     };
   }
