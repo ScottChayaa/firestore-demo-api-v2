@@ -94,6 +94,11 @@ export class MembersRepository {
       query = query.where('deletedAt', '==', null);
     }
 
+    // isActive 筛选
+    if (queryDto.isActive !== undefined) {
+      query = query.where('isActive', '==', queryDto.isActive);
+    }
+
     // 搜尋功能（name 或 email）
     // 注意：Firestore 的搜尋功能有限，這裡只做前綴搜尋
     if (queryDto.search) {

@@ -29,6 +29,17 @@ export class MemberQueryDto extends PaginationDto {
   includeDeleted?: boolean;
 
   /**
+   * 筛选启用/停用状态
+   * true: 仅启用会员
+   * false: 仅停用会员
+   * undefined: 所有会员
+   */
+  @IsOptional()
+  @IsBoolean({ message: 'isActive 必須是布林值' })
+  @ToBoolean()
+  isActive?: boolean;
+
+  /**
    * 搜尋關鍵字
    * 用於搜尋 name 或 email
    */
