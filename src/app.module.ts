@@ -75,11 +75,11 @@ const SEVERITY_LOOKUP = {
             },
 
             // 自定義日誌級別
-            // customLogLevel: (req, res, err) => {
-            //   if (res.statusCode >= 400 && res.statusCode < 500) return 'warn';
-            //   if (res.statusCode >= 500 || err) return 'error';
-            //   return 'info';
-            // },
+            customLogLevel: (req, res, err) => {
+              if (res.statusCode >= 400 && res.statusCode < 500) return 'warn';
+              if (res.statusCode >= 500 || err) return 'error';
+              return 'info';
+            },
 
             // 自訂成功請求的額外日誌資料
             // 在響應完成後補充 params 和 query（此時路由參數已解析）

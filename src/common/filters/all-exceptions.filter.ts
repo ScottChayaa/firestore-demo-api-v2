@@ -37,16 +37,11 @@ export class AllExceptionsFilter implements ExceptionFilter {
         status = HttpStatus.UNAUTHORIZED;
       }
     }
-
+    
     // 記錄錯誤
     this.logger.error(
       {
-        exception,
-        request: {
-          method: request.method,
-          url: request.url,
-          body: request.body,
-        },
+        stack: exception instanceof Error ? exception.stack.split('\n') : undefined,
       },
       'Exception occurred',
     );
@@ -54,8 +49,6 @@ export class AllExceptionsFilter implements ExceptionFilter {
     response.status(status).json({
       statusCode: status,
       message,
-      timestamp: new Date().toISOString(),
-      path: request.url,
     });
   }
 }
