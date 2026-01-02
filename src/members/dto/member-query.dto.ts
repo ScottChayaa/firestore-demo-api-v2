@@ -1,6 +1,6 @@
 import { IsOptional, IsEnum, IsBoolean, IsString } from 'class-validator';
-import { Type } from 'class-transformer';
 import { PaginationDto } from '../../common/dto/pagination.dto';
+import { ToBoolean } from '../../common/decorators/to-boolean.decorator';
 
 /**
  * 查詢會員列表 DTO
@@ -25,7 +25,7 @@ export class MemberQueryDto extends PaginationDto {
    */
   @IsOptional()
   @IsBoolean({ message: 'includeDeleted 必須是布林值' })
-  @Type(() => Boolean)
+  @ToBoolean()
   includeDeleted?: boolean;
 
   /**
