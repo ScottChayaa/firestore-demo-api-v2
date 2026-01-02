@@ -24,8 +24,8 @@ export class MemberQueryDto extends PaginationDto {
    * 預設：false（不包含已刪除）
    */
   @IsOptional()
-  @IsBoolean({ message: 'includeDeleted 必須是布林值' })
   @ToBoolean()
+  @IsBoolean({ message: 'includeDeleted 必須是布林值' })
   includeDeleted?: boolean;
 
   /**
@@ -35,8 +35,8 @@ export class MemberQueryDto extends PaginationDto {
    * undefined: 所有会员
    */
   @IsOptional()
-  @IsBoolean({ message: 'isActive 必須是布林值' })
   @ToBoolean()
+  @IsBoolean({ message: 'isActive 必須是布林值' })
   isActive?: boolean;
 
   /**
