@@ -8,6 +8,7 @@ export class PaginationHelper {
   static async paginate<T>(
     query: admin.firestore.Query,
     options: PaginationQuery,
+    mapper?: (doc: admin.firestore.DocumentSnapshot) => T,
   ): Promise<PaginationResult<T>> {
     const { cursor, limit = 20 } = options;
 
@@ -31,10 +32,12 @@ export class PaginationHelper {
       docs.pop();
     }
 
-    const data = docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    })) as T[];
+    const data = mapper
+      ? docs.map(mapper)
+      : docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        })) as T[];
 
     return {
       data,

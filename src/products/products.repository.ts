@@ -35,11 +35,15 @@ export class ProductsRepository {
     const order = query.order || 'desc';
     firestoreQuery = firestoreQuery.orderBy(orderBy, order);
 
-    // 執行分頁查詢
-    return PaginationHelper.paginate<Product>(firestoreQuery, {
-      cursor: query.cursor,
-      limit: query.limit,
-    });
+    // 執行分頁查詢（使用 mapToEntity 转换 Firestore Timestamp 为 Date）
+    return PaginationHelper.paginate<Product>(
+      firestoreQuery,
+      {
+        cursor: query.cursor,
+        limit: query.limit,
+      },
+      (doc) => this.mapToEntity(doc),
+    );
   }
 
   /**

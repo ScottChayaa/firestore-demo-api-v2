@@ -109,11 +109,15 @@ export class MembersRepository {
     const order = queryDto.order || 'desc';
     query = query.orderBy(orderBy, order);
 
-    // 分頁
-    return PaginationHelper.paginate<Member>(query, {
-      cursor: queryDto.cursor,
-      limit: queryDto.limit,
-    });
+    // 分頁（使用 mapToEntity 转换 Firestore Timestamp 为 Date）
+    return PaginationHelper.paginate<Member>(
+      query,
+      {
+        cursor: queryDto.cursor,
+        limit: queryDto.limit,
+      },
+      (doc) => this.mapToEntity(doc),
+    );
   }
 
   /**
