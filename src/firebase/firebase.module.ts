@@ -53,17 +53,26 @@ import { readFileSync } from 'fs';
     },
     {
       provide: 'FIRESTORE',
-      useFactory: (app: admin.app.App | null) => {
+      useFactory: (app: admin.app.App | null, configService: ConfigService) => {
         if (!app) {
           console.warn('⚠️  Firestore not available (Firebase not initialized)');
           return null;
         }
 
+        const databaseId = configService.get<string>('firebase.databaseId');
         const db = app.firestore();
-        console.log('✅ Firestore connected successfully');
+
+        // 設置 database ID（如果不是 default）
+        if (databaseId && databaseId !== '(default)') {
+          db.settings({ databaseId });
+          console.log(`✅ Firestore connected to database: ${databaseId}`);
+        } else {
+          console.log('✅ Firestore connected to (default) database');
+        }
+
         return db;
       },
-      inject: ['FIREBASE_APP'],
+      inject: ['FIREBASE_APP', ConfigService],
     },
     {
       provide: 'FIREBASE_AUTH',
