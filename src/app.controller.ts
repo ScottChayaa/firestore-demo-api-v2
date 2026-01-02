@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Req } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Req, HttpException } from '@nestjs/common';
 import { AppService } from './app.service';
 import { Public } from './common/decorators/public.decorator';
 import { PinoLogger } from 'nestjs-pino';
@@ -25,8 +25,6 @@ export class AppController {
   @Public()
   @Get('health')
   getHealth() {
-    this.logger.debug('This is debug level');
-
     return {
       status: 'ok',
       timestamp: new Date().toISOString(),
@@ -36,8 +34,7 @@ export class AppController {
   // 測試 POST 請求
   @Public()
   @Post('test/echo')
-  testEcho(@Body() body: any, @Req() req: any) {
-    this.logger.info({ body }, 'Echo request received');
+  testEcho(@Body() body: any) {
     return {
       message: 'Echo response',
       receivedBody: body,
@@ -48,8 +45,7 @@ export class AppController {
   // 測試帶 params 的 URI
   @Public()
   @Get('test/users/:userId')
-  testGetUser(@Param('userId') userId: string, @Req() req: any) {
-    this.logger.info({ userId }, 'Get user by ID');
+  testGetUser(@Param('userId') userId: string) {
     return {
       message: 'User details',
       userId,
@@ -63,9 +59,7 @@ export class AppController {
   testGetUserOrder(
     @Param('userId') userId: string,
     @Param('orderId') orderId: string,
-    @Req() req: any,
   ) {
-    this.logger.info({ userId, orderId }, 'Get user order');
     return {
       message: 'Order details',
       userId,
@@ -74,19 +68,10 @@ export class AppController {
     };
   }
 
-  // 測試錯誤處理 (400)
-  @Public()
-  @Get('test/error/400')
-  testError400() {
-    this.logger.warn('Testing 400 error');
-    throw new Error('Bad Request Test');
-  }
-
   // 測試錯誤處理 (500)
   @Public()
   @Get('test/error/500')
   testError500() {
-    this.logger.error('Testing 500 error');
-    throw new Error('Internal Server Error Test');
+    throw new HttpException('Internal Server Error Test', 500);
   }
 }
