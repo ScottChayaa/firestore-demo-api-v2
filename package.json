@@ -16,8 +16,10 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
-    "seed": "ts-node -r tsconfig-paths/register src/seed/seed.script.ts",
-    "clear": "ts-node -r tsconfig-paths/register src/seed/clear.script.ts"
+    "seed": "ts-node -r tsconfig-paths/register src/scripts/seed.ts",
+    "clean:firestore": "ts-node -r tsconfig-paths/register src/scripts/clean-firestore.ts",
+    "clean:auth": "ts-node -r tsconfig-paths/register src/scripts/clean-auth.ts",
+    "clean:all": "npm run clean:firestore && npm run clean:auth"
   },
   "keywords": [],
   "author": "",

@@ -72,9 +72,9 @@ export default () => {
 
     // Seed Data Configuration
     seed: {
-      membersCount: parseInt(config.SEED_MEMBERS_COUNT, 10) || 100,
-      ordersCount: parseInt(config.SEED_ORDERS_COUNT, 10) || 500,
-      productsCount: parseInt(config.SEED_PRODUCTS_COUNT, 10) || 50,
+      membersCount: parseInt(config.SEED_MEMBERS_COUNT, 10) || 10,
+      ordersCount: parseInt(config.SEED_ORDERS_COUNT, 10) || 50,
+      productsCount: parseInt(config.SEED_PRODUCTS_COUNT, 10) || 10,
     },
   };
 };
