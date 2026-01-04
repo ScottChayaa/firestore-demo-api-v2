@@ -35,7 +35,7 @@ async function bootstrap() {
       forbidNonWhitelisted: true, // 如果有未定義的屬性，拋出錯誤
       transform: true, // 自動轉換型別
       transformOptions: {
-        enableImplicitConversion: true, // 啟用隱式轉換（query params）
+        enableImplicitConversion: false, // 禁用隱式轉換，使用顯式 @Type() 和 @Transform()
       },
     }),
   );
