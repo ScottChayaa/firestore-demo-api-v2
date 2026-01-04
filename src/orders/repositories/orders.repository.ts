@@ -24,8 +24,16 @@ export class OrdersRepository {
     const orderNumber = this.generateOrderNumber();
     const now = admin.firestore.Timestamp.now();
 
+    // 將 DTO 類實例轉換為純物件（Firestore 不支援帶有類原型的物件）
+    const plainItems = data.items.map((item) => ({
+      productId: item.productId,
+      productName: item.productName,
+      quantity: item.quantity,
+      price: item.price,
+    }));
+
     // 計算訂單總金額
-    const totalAmount = data.items.reduce(
+    const totalAmount = plainItems.reduce(
       (sum, item) => sum + item.price * item.quantity,
       0,
     );
@@ -33,7 +41,7 @@ export class OrdersRepository {
     const orderData = {
       orderNumber,
       memberId: data.memberId,
-      items: data.items,
+      items: plainItems,
       totalAmount,
       status: 'pending',
       createdAt: now,

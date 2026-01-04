@@ -1,6 +1,6 @@
 @baseUrl = http://localhost:8080
 @contentType = application/json
-@adminToken = Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6ImEzOGVhNmEwNDA4YjBjYzVkYTE4OWRmYzg4ODgyZDBmMWI3ZmJmMGUiLCJ0eXAiOiJKV1QifQ.eyJuYW1lIjoiYWRtaW4iLCJhZG1pbiI6dHJ1ZSwiaXNzIjoiaHR0cHM6Ly9zZWN1cmV0b2tlbi5nb29nbGUuY29tL2xpYW5nLWRldiIsImF1ZCI6ImxpYW5nLWRldiIsImF1dGhfdGltZSI6MTc2NzUyOTkwMCwidXNlcl9pZCI6InVCM285NHgzVGxiRHM0N2pZQ1Vnb2tVTjBNaTIiLCJzdWIiOiJ1QjNvOTR4M1RsYkRzNDdqWUNVZ29rVU4wTWkyIiwiaWF0IjoxNzY3NTI5OTAwLCJleHAiOjE3Njc1MzM1MDAsImVtYWlsIjoiYWRtaW5AZXhhbXBsZS5jb20iLCJlbWFpbF92ZXJpZmllZCI6ZmFsc2UsImZpcmViYXNlIjp7ImlkZW50aXRpZXMiOnsiZW1haWwiOlsiYWRtaW5AZXhhbXBsZS5jb20iXX0sInNpZ25faW5fcHJvdmlkZXIiOiJwYXNzd29yZCJ9fQ.xlAmUD1scX_36dVtIcfEcl0is8z7r8L_V2WigyNoetkTMno2-vjYYgeZaAGQBiFJNID5FVUXNO3ty7vVEHhNuMV-zizKjy-mA67K7ysTaht7yaEJGZ_7jpu7cdcXS9QpsXP1ZmnEzQSQP2ZwyC_P9-7G_c2WnLtFNzmr8M5bWQo9WgfxJSyyF4KjlilMyQDMEjlcDrnjYK0P2hFKlhZuDI8mAXCHQNuBDqfw_T4STjnQMbUW9ZwyN5jrrwMZb81xvuvggexojh6lfrNxigZ_ltnJZt84xnjKHFi-0Ce_EEknMbNSKnbfd9Xjju47MAG6dstofpHvRQpGT-N_lHbyfA
+@adminToken = Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6ImEzOGVhNmEwNDA4YjBjYzVkYTE4OWRmYzg4ODgyZDBmMWI3ZmJmMGUiLCJ0eXAiOiJKV1QifQ.eyJuYW1lIjoiYWRtaW4iLCJhZG1pbiI6dHJ1ZSwiaXNzIjoiaHR0cHM6Ly9zZWN1cmV0b2tlbi5nb29nbGUuY29tL2xpYW5nLWRldiIsImF1ZCI6ImxpYW5nLWRldiIsImF1dGhfdGltZSI6MTc2NzUzMzYyMiwidXNlcl9pZCI6InVCM285NHgzVGxiRHM0N2pZQ1Vnb2tVTjBNaTIiLCJzdWIiOiJ1QjNvOTR4M1RsYkRzNDdqWUNVZ29rVU4wTWkyIiwiaWF0IjoxNzY3NTMzNjIyLCJleHAiOjE3Njc1MzcyMjIsImVtYWlsIjoiYWRtaW5AZXhhbXBsZS5jb20iLCJlbWFpbF92ZXJpZmllZCI6ZmFsc2UsImZpcmViYXNlIjp7ImlkZW50aXRpZXMiOnsiZW1haWwiOlsiYWRtaW5AZXhhbXBsZS5jb20iXX0sInNpZ25faW5fcHJvdmlkZXIiOiJwYXNzd29yZCJ9fQ.7nD66xA-rhJYrVqiANOA3b3tV3XObl9Y4GGcJEnFC-CqTPJ-udiVKEGPGN59Qyc0RXsEbclqIchC9EpxQqsfPmOO9-xUyb9Ad3woSsBTnazHjdEa83EA2Vf9XkFhLl262AHDmGJbyMKpvoaeXxZkLSHCxc7BEDGb4UW6akC20XgrF8qUOknmYfY8xhoUVSFgy99p3kH0D2YittwkzrD7cuNNF4QqRqEIpTnGtm6QodWXBnd2TtDJ8PpZFbqAvnaYXNmu4sx8HAXpUFEvKvYb_4jBUXWsf6pjxPJOst-jRxmfcGQgF5ixqhzExBH7TR716R7bdrX3cOqXZqLwR_m2CA
 
 ### ============================================
 ### 管理員登入（Email/Password 直接取得含管理員角色的 ID Token）
@@ -180,7 +180,7 @@ Authorization: {{adminToken}}
 
 {
   "uid": "oUUspiRAxdfHJjQGeTxKpyO5lMG2",
-  "name": "管理員也是會員"
+  "name": "會員也是管理員"
 }
 
 ### ============================================
@@ -315,7 +315,7 @@ Content-Type: {{contentType}}
 Authorization: {{adminToken}}
 
 {
-  "memberId": "x1lk1SSt4ygSg8zfPpxuAnQHIyt1",
+  "memberId": "sA0F9DmqlNaUWZ2MkGe0TceoD7G2",
   "items": [
     {
       "productId": "product111111",
@@ -329,8 +329,7 @@ Authorization: {{adminToken}}
       "quantity": 1,
       "price": 222
     }
-  ],
-  "totalAmount": 422
+  ]
 }
 
 ### ============================================
