@@ -4,6 +4,7 @@ import {
   ConflictException,
   NotFoundException,
   BadRequestException,
+  InternalServerErrorException,
 } from '@nestjs/common';
 import * as admin from 'firebase-admin';
 import { MembersRepository } from '../repositories/members.repository';
@@ -254,6 +255,77 @@ export class MembersAdminService {
       return resetLink;
     } catch (error) {
       throw new BadRequestException(`產生重設連結失敗: ${error.message}`);
+    }
+  }
+
+  /**
+   * 賦予現有 Firebase Auth 帳號會員角色
+   * 將已存在的 Firebase Auth 用戶添加到 members 集合
+   *
+   * 流程：
+   * 1. 檢查該 UID 是否已在 members 表中存在
+   * 2. 驗證 Firebase Auth 中該 UID 是否存在
+   * 3. 從 Auth 獲取用戶資訊（email 必須存在）
+   * 4. 設定 Custom Claims (member: true)
+   * 5. 在 Firestore 建立會員記錄
+   * 6. 如果 Firestore 操作失敗，回滾 Custom Claims
+   *
+   * @param uid - Firebase Auth UID
+   * @param name - 會員名稱
+   * @returns 創建的會員記錄
+   * @throws ConflictException - 該帳號已經是會員
+   * @throws NotFoundException - Firebase Auth 中找不到該 UID
+   * @throws BadRequestException - Auth 帳號沒有 Email
+   * @throws InternalServerErrorException - 設定權限或創建記錄失敗
+   */
+  async assignMemberRole(uid: string, name: string): Promise<Member> {
+    // 1. 檢查該 uid 是否已在 members 表中存在（包含已刪除的）
+    const existingMember = await this.membersRepo.findById(uid, {
+      includeDeleted: true, // 包含已刪除的，防止重複賦予
+    });
+
+    if (existingMember) {
+      throw new ConflictException('該帳號已經賦予會員角色');
+    }
+
+    // 2. 驗證 Firebase Auth 中該 uid 是否存在，並獲取用戶資訊
+    let authUser: admin.auth.UserRecord;
+    try {
+      authUser = await this.auth.getUser(uid);
+    } catch (error) {
+      throw new NotFoundException(`找不到 UID: ${uid} 的 Firebase Auth 帳號`);
+    }
+
+    // 3. 從 Auth 獲取 email（必須存在）
+    if (!authUser.email) {
+      throw new BadRequestException('該 Firebase Auth 帳號沒有電子郵件地址');
+    }
+
+    // 4. 設定 Custom Claims
+    try {
+      await this.auth.setCustomUserClaims(uid, { member: true });
+    } catch (error) {
+      throw new InternalServerErrorException('設定會員權限失敗');
+    }
+
+    // 5. 在 Firestore 建立會員記錄
+    try {
+      const member = await this.membersRepo.create(uid, {
+        email: authUser.email,
+        name: name,
+        phone: authUser.phoneNumber || null,
+        isActive: !authUser.disabled, // 根據 Auth 的 disabled 狀態設定
+      });
+
+      return member;
+    } catch (error) {
+      // 如果 Firestore 創建失敗，回滾 Custom Claims
+      try {
+        await this.auth.setCustomUserClaims(uid, { member: false });
+      } catch (rollbackError) {
+        console.error(`回滾 Custom Claims 失敗: ${rollbackError.message}`);
+      }
+      throw new InternalServerErrorException('創建會員記錄失敗');
     }
   }
 }

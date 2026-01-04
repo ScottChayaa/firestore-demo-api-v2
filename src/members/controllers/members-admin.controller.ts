@@ -20,6 +20,7 @@ import { MembersAdminService } from '../services/members-admin.service';
 import { CreateMemberDto } from '../dto/create-member.dto';
 import { UpdateMemberDto } from '../dto/update-member.dto';
 import { MemberQueryDto } from '../dto/member-query.dto';
+import { AssignMemberRoleDto } from '../dto/assign-member-role.dto';
 import { Member } from '../entities/member.entity';
 import { PaginationResult } from '../../common/pagination/pagination.interface';
 import { PinoLogger, InjectPinoLogger } from 'nestjs-pino';
@@ -174,6 +175,27 @@ export class MembersAdminController {
     this.logger.info({ memberId: id }, '產生密碼重設連結成功');
     return {
       resetLink,
+    };
+  }
+
+  /**
+   * POST /api/admin/members/assign-role
+   * 賦予現有 Firebase Auth 帳號會員角色
+   */
+  @Post('assign-role')
+  @HttpCode(HttpStatus.CREATED)
+  async assignMemberRole(@Body() dto: AssignMemberRoleDto) {
+    this.logger.info({ uid: dto.uid, name: dto.name }, '賦予會員角色請求');
+    const member = await this.membersAdminService.assignMemberRole(
+      dto.uid,
+      dto.name,
+    );
+    this.logger.info({ uid: member.id, email: member.email }, '賦予會員角色成功');
+    return {
+      message: '會員角色賦予成功',
+      uid: member.id,
+      email: member.email,
+      name: member.name,
     };
   }
 }

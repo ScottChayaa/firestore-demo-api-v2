@@ -46,9 +46,9 @@ Authorization: {{adminToken}}
 }
 
 ### ============================================
-### 會員管理 - 賦予會員角色（現有帳號）      TODO: 還沒做
+### 會員管理 - 賦予會員角色（現有帳號）
 ### ============================================
-POST {{baseUrl}}/api/admin/members/create-role
+POST {{baseUrl}}/api/admin/members/assign-role
 Content-Type: {{contentType}}
 Authorization: {{adminToken}}
 
