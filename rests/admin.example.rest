@@ -77,14 +77,14 @@ Authorization: {{adminToken}}
 }
 
 ### ============================================
-### 會員管理 - 更新會員密碼          TODO: 有問題
+### 會員管理 - 更新會員密碼
 ### ============================================
 PATCH  {{baseUrl}}/api/admin/members/NJCCoWaBVnh3odrVuQfvTh6gS4g1/password
 Content-Type: {{contentType}}
 Authorization: {{adminToken}}
 
 {
-  "newPassword": "qq111111",
+  "newPassword": "qq111111"
 }
 
 ### ============================================
