@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { LoggerModule } from 'nestjs-pino';
+import { ThrottlerModule } from '@nestjs/throttler';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import configuration from './config/configuration';
@@ -30,6 +31,12 @@ const SEVERITY_LOOKUP = {
       load: [configuration],
       envFilePath: ['.env', 'env.yaml'],
     }),
+    ThrottlerModule.forRoot([
+      {
+        ttl: 60000, // 60 秒
+        limit: 10, // 最多 10 次請求
+      },
+    ]),
     LoggerModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (config: ConfigService) => {

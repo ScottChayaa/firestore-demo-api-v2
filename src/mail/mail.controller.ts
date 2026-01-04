@@ -1,4 +1,12 @@
-import { Controller, Post, Body, HttpCode, HttpStatus } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  HttpCode,
+  HttpStatus,
+  UseGuards,
+} from '@nestjs/common';
+import { ThrottlerGuard } from '@nestjs/throttler';
 import { MailService } from './mail.service';
 import { SendMailDto } from './dto/send-mail.dto';
 import { PinoLogger, InjectPinoLogger } from 'nestjs-pino';
@@ -7,7 +15,7 @@ import { Public } from '../common/decorators/public.decorator';
 /**
  * 郵件 Controller
  * 提供郵件發送端點
- * 注意：此端點為公開 API，應該配合 Rate Limiter 使用以防止濫用
+ * 注意：此端點為公開 API，使用 ThrottlerGuard 防止濫用
  */
 @Controller('send-email')
 export class MailController {
@@ -20,9 +28,10 @@ export class MailController {
   /**
    * POST /api/send-email
    * 發送郵件
-   * 注意：此端點應該配合 ThrottlerGuard 使用
+   * 頻率限制：60 秒內最多 10 次請求
    */
   @Public()
+  @UseGuards(ThrottlerGuard)
   @Post()
   @HttpCode(HttpStatus.OK)
   async sendEmail(@Body() dto: SendMailDto) {

@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
+import { ThrottlerExceptionFilter } from './common/filters/throttler-exception.filter';
 import { Logger } from 'nestjs-pino';
 import helmet from 'helmet';
 
@@ -41,7 +42,11 @@ async function bootstrap() {
   );
 
   // 註冊全域 Exception Filter
-  app.useGlobalFilters(new AllExceptionsFilter());
+  // 注意：更具體的 Filter 應該先註冊
+  app.useGlobalFilters(
+    new ThrottlerExceptionFilter(),
+    new AllExceptionsFilter(),
+  );
 
   const port = configService.get<number>('port') || 8080;
   await app.listen(port);
