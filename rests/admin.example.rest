@@ -1,6 +1,6 @@
 @baseUrl = http://localhost:8080
 @contentType = application/json
-@adminToken = Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6ImEzOGVhNmEwNDA4YjBjYzVkYTE4OWRmYzg4ODgyZDBmMWI3ZmJmMGUiLCJ0eXAiOiJKV1QifQ.eyJuYW1lIjoiYWRtaW4iLCJhZG1pbiI6dHJ1ZSwiaXNzIjoiaHR0cHM6Ly9zZWN1cmV0b2tlbi5nb29nbGUuY29tL2xpYW5nLWRldiIsImF1ZCI6ImxpYW5nLWRldiIsImF1dGhfdGltZSI6MTc2NzUxOTY1MSwidXNlcl9pZCI6ImhlUGVIQ3hzVkxNcGFydVZjeHJPdkQzS0pNRDIiLCJzdWIiOiJoZVBlSEN4c1ZMTXBhcnVWY3hyT3ZEM0tKTUQyIiwiaWF0IjoxNzY3NTE5NjUxLCJleHAiOjE3Njc1MjMyNTEsImVtYWlsIjoiYWRtaW5AZXhhbXBsZS5jb20iLCJlbWFpbF92ZXJpZmllZCI6ZmFsc2UsImZpcmViYXNlIjp7ImlkZW50aXRpZXMiOnsiZW1haWwiOlsiYWRtaW5AZXhhbXBsZS5jb20iXX0sInNpZ25faW5fcHJvdmlkZXIiOiJwYXNzd29yZCJ9fQ.vKnrhfdoaOOIzx0c_jGXKF-78jyUDEskvMsS734DlIHSufuDt0r0r2XstOkDCGrTioHbSmGj1_B3P1O4gkETseLfc-RdRyZOcysU8FVZ7_LjRqKFLH9yPYi8eLotZ3R0LtIT-E68eVTuS7jdcaa0Yg6j4mrZzS03yx8OixCEV-Sedj8EIYBsqY0oeY-3VRi6-GbIPKuPsVwtD6dDbRWetJJXwgCuBWO9-ymCeaDIPe-OJvsYpCmyGI2tNLDxK5GA_AJTSAum83MmnB5VLWUcvDmtPLNtLYIfCneLxUw9GgCj0RxJIhU5fRnpxYPjUBYt28lcbIfXL2G9N0YuPpNlJA
+@adminToken = Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6ImEzOGVhNmEwNDA4YjBjYzVkYTE4OWRmYzg4ODgyZDBmMWI3ZmJmMGUiLCJ0eXAiOiJKV1QifQ.eyJuYW1lIjoiYWRtaW4iLCJhZG1pbiI6dHJ1ZSwiaXNzIjoiaHR0cHM6Ly9zZWN1cmV0b2tlbi5nb29nbGUuY29tL2xpYW5nLWRldiIsImF1ZCI6ImxpYW5nLWRldiIsImF1dGhfdGltZSI6MTc2NzUyOTkwMCwidXNlcl9pZCI6InVCM285NHgzVGxiRHM0N2pZQ1Vnb2tVTjBNaTIiLCJzdWIiOiJ1QjNvOTR4M1RsYkRzNDdqWUNVZ29rVU4wTWkyIiwiaWF0IjoxNzY3NTI5OTAwLCJleHAiOjE3Njc1MzM1MDAsImVtYWlsIjoiYWRtaW5AZXhhbXBsZS5jb20iLCJlbWFpbF92ZXJpZmllZCI6ZmFsc2UsImZpcmViYXNlIjp7ImlkZW50aXRpZXMiOnsiZW1haWwiOlsiYWRtaW5AZXhhbXBsZS5jb20iXX0sInNpZ25faW5fcHJvdmlkZXIiOiJwYXNzd29yZCJ9fQ.xlAmUD1scX_36dVtIcfEcl0is8z7r8L_V2WigyNoetkTMno2-vjYYgeZaAGQBiFJNID5FVUXNO3ty7vVEHhNuMV-zizKjy-mA67K7ysTaht7yaEJGZ_7jpu7cdcXS9QpsXP1ZmnEzQSQP2ZwyC_P9-7G_c2WnLtFNzmr8M5bWQo9WgfxJSyyF4KjlilMyQDMEjlcDrnjYK0P2hFKlhZuDI8mAXCHQNuBDqfw_T4STjnQMbUW9ZwyN5jrrwMZb81xvuvggexojh6lfrNxigZ_ltnJZt84xnjKHFi-0Ce_EEknMbNSKnbfd9Xjju47MAG6dstofpHvRQpGT-N_lHbyfA
 
 ### ============================================
 ### 管理員登入（Email/Password 直接取得含管理員角色的 ID Token）
@@ -53,8 +53,8 @@ Content-Type: {{contentType}}
 Authorization: {{adminToken}}
 
 {
-  "uid": "hePeHCxsVLMparuVcxrOvD3KJMD2",
-  "name": "管理員.香蕉人"
+  "uid": "oUUspiRAxdfHJjQGeTxKpyO5lMG2",
+  "name": "管理員也是會員"
 }
 
 ### ============================================
@@ -167,7 +167,7 @@ Authorization: {{adminToken}}
 
 {
   "email": "newadmin@example.com",
-  "password": "admin123456",
+  "password": "qwer1234",
   "name": "新管理員"
 }
 
@@ -179,21 +179,21 @@ Content-Type: {{contentType}}
 Authorization: {{adminToken}}
 
 {
-  "uid": "o5hpcO7pPIVcJdiEZeIoenYVm773",
-  "name": "黃金管理員"
+  "uid": "oUUspiRAxdfHJjQGeTxKpyO5lMG2",
+  "name": "管理員也是會員"
 }
 
 ### ============================================
 ### 管理員管理 - 查詢單一管理員
 ### ============================================
-GET {{baseUrl}}/api/admin/admins/o5hpcO7pPIVcJdiEZeIoenYVm773
+GET {{baseUrl}}/api/admin/admins/oUUspiRAxdfHJjQGeTxKpyO5lMG2
 Content-Type: {{contentType}}
 Authorization: {{adminToken}}
 
 ### ============================================
 ### 管理員管理 - 更新管理員資料
 ### ============================================
-PUT {{baseUrl}}/api/admin/admins/o5hpcO7pPIVcJdiEZeIoenYVm773
+PUT {{baseUrl}}/api/admin/admins/oUUspiRAxdfHJjQGeTxKpyO5lMG2
 Content-Type: {{contentType}}
 Authorization: {{adminToken}}
 
@@ -204,28 +204,28 @@ Authorization: {{adminToken}}
 ### ============================================
 ### 管理員管理 - 刪除管理員（軟刪除）
 ### ============================================
-DELETE {{baseUrl}}/api/admin/admins/o5hpcO7pPIVcJdiEZeIoenYVm773
+DELETE {{baseUrl}}/api/admin/admins/oUUspiRAxdfHJjQGeTxKpyO5lMG2
 Content-Type: {{contentType}}
 Authorization: {{adminToken}}
 
 ### ============================================
 ### 管理員管理 - 切換管理員啟用/停用狀態
 ### ============================================
-PATCH {{baseUrl}}/api/admin/admins/o5hpcO7pPIVcJdiEZeIoenYVm773/toggle-status
+PATCH {{baseUrl}}/api/admin/admins/oUUspiRAxdfHJjQGeTxKpyO5lMG2/toggle-status
 Content-Type: {{contentType}}
 Authorization: {{adminToken}}
 
 ### ============================================
 ### 管理員管理 - 恢復已軟刪除的管理員
 ### ============================================
-POST {{baseUrl}}/api/admin/admins/o5hpcO7pPIVcJdiEZeIoenYVm773/restore
+POST {{baseUrl}}/api/admin/admins/oUUspiRAxdfHJjQGeTxKpyO5lMG2/restore
 Content-Type: {{contentType}}
 Authorization: {{adminToken}}
 
 ### ============================================
 ### 管理員管理 - 查詢管理員列表（包含已刪除）
 ### ============================================
-GET {{baseUrl}}/api/admin/admins?includeDeleted=false
+GET {{baseUrl}}/api/admin/admins?includeDeleted=true
 Content-Type: {{contentType}}
 Authorization: {{adminToken}}
 
