@@ -1,10 +1,10 @@
 /**
- * Member 實體介面
- * 定義會員在系統中的資料結構
+ * Admin 實體介面
+ * 定義管理員在系統中的資料結構
  */
-export interface Member {
+export interface Admin {
   /**
-   * 會員唯一識別碼（Firebase Auth UID）
+   * 管理員唯一識別碼（Firebase Auth UID）
    * 同時作為 Firestore Document ID
    */
   id: string;
@@ -15,14 +15,9 @@ export interface Member {
   email: string;
 
   /**
-   * 會員姓名
+   * 管理員姓名
    */
   name: string;
-
-  /**
-   * 電話號碼（可選）
-   */
-  phone?: string;
 
   /**
    * 啟用狀態

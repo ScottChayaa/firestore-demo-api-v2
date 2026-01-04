@@ -1,6 +1,6 @@
 @baseUrl = http://localhost:8080
 @contentType = application/json
-@adminToken = Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6ImEzOGVhNmEwNDA4YjBjYzVkYTE4OWRmYzg4ODgyZDBmMWI3ZmJmMGUiLCJ0eXAiOiJKV1QifQ.eyJuYW1lIjoiYWRtaW4iLCJhZG1pbiI6dHJ1ZSwiaXNzIjoiaHR0cHM6Ly9zZWN1cmV0b2tlbi5nb29nbGUuY29tL2xpYW5nLWRldiIsImF1ZCI6ImxpYW5nLWRldiIsImF1dGhfdGltZSI6MTc2NzUwOTI4OCwidXNlcl9pZCI6ImhlUGVIQ3hzVkxNcGFydVZjeHJPdkQzS0pNRDIiLCJzdWIiOiJoZVBlSEN4c1ZMTXBhcnVWY3hyT3ZEM0tKTUQyIiwiaWF0IjoxNzY3NTA5Mjg4LCJleHAiOjE3Njc1MTI4ODgsImVtYWlsIjoiYWRtaW5AZXhhbXBsZS5jb20iLCJlbWFpbF92ZXJpZmllZCI6ZmFsc2UsImZpcmViYXNlIjp7ImlkZW50aXRpZXMiOnsiZW1haWwiOlsiYWRtaW5AZXhhbXBsZS5jb20iXX0sInNpZ25faW5fcHJvdmlkZXIiOiJwYXNzd29yZCJ9fQ.D9k6vEPXpfxyBwopFG4Q2YnayMh9Y11M6-3_PK1DoPdIdf1xBPeIU3Sei4DXq4QTh4PV2JG-2eP_G8pnGaBKhAKmrJxS0JF6HfkH8e87HVsTNIRYjFPnw8hPbPTrXTuRTbxT4ReE8gKEukhExsDd7gms9OZk8hVDvvqVjhaW0LDuh6-pHG02w6MDrMmbJOFQXTM6kEj2ToQWFrVnDfVPqyRtj4M1puxDNXlwfnlrCmDq5LoKWMIOksf6q3bKPj1cLYkzB659ctWSbiqGGNNhiGV2hkkZk6YrFNGrYTwRLjUwHhJYxzLxbtNVtRUNW522wU1kqSXi-XVxl7HVuGTxAg
+@adminToken = Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6ImEzOGVhNmEwNDA4YjBjYzVkYTE4OWRmYzg4ODgyZDBmMWI3ZmJmMGUiLCJ0eXAiOiJKV1QifQ.eyJuYW1lIjoiYWRtaW4iLCJhZG1pbiI6dHJ1ZSwiaXNzIjoiaHR0cHM6Ly9zZWN1cmV0b2tlbi5nb29nbGUuY29tL2xpYW5nLWRldiIsImF1ZCI6ImxpYW5nLWRldiIsImF1dGhfdGltZSI6MTc2NzUxOTY1MSwidXNlcl9pZCI6ImhlUGVIQ3hzVkxNcGFydVZjeHJPdkQzS0pNRDIiLCJzdWIiOiJoZVBlSEN4c1ZMTXBhcnVWY3hyT3ZEM0tKTUQyIiwiaWF0IjoxNzY3NTE5NjUxLCJleHAiOjE3Njc1MjMyNTEsImVtYWlsIjoiYWRtaW5AZXhhbXBsZS5jb20iLCJlbWFpbF92ZXJpZmllZCI6ZmFsc2UsImZpcmViYXNlIjp7ImlkZW50aXRpZXMiOnsiZW1haWwiOlsiYWRtaW5AZXhhbXBsZS5jb20iXX0sInNpZ25faW5fcHJvdmlkZXIiOiJwYXNzd29yZCJ9fQ.vKnrhfdoaOOIzx0c_jGXKF-78jyUDEskvMsS734DlIHSufuDt0r0r2XstOkDCGrTioHbSmGj1_B3P1O4gkETseLfc-RdRyZOcysU8FVZ7_LjRqKFLH9yPYi8eLotZ3R0LtIT-E68eVTuS7jdcaa0Yg6j4mrZzS03yx8OixCEV-Sedj8EIYBsqY0oeY-3VRi6-GbIPKuPsVwtD6dDbRWetJJXwgCuBWO9-ymCeaDIPe-OJvsYpCmyGI2tNLDxK5GA_AJTSAum83MmnB5VLWUcvDmtPLNtLYIfCneLxUw9GgCj0RxJIhU5fRnpxYPjUBYt28lcbIfXL2G9N0YuPpNlJA
 
 ### ============================================
 ### 管理員登入（Email/Password 直接取得含管理員角色的 ID Token）
@@ -53,8 +53,8 @@ Content-Type: {{contentType}}
 Authorization: {{adminToken}}
 
 {
-  "uid": "NJCCoWaBVnh3odrVuQfvTh6gS4g1",
-  "name": "香蕉人"
+  "uid": "hePeHCxsVLMparuVcxrOvD3KJMD2",
+  "name": "管理員.香蕉人"
 }
 
 ### ============================================
