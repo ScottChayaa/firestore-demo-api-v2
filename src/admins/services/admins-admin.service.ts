@@ -230,7 +230,7 @@ export class AdminsAdminService {
    * @throws BadRequestException - Auth 帳號沒有 Email
    * @throws InternalServerErrorException - 設定權限或創建記錄失敗
    */
-  async createAdminRole(uid: string, name: string): Promise<Admin> {
+  async assignAdminRole(uid: string, name: string): Promise<Admin> {
     // 1. 檢查該 uid 是否已在 admins 表中存在（包含已刪除的）
     const existingAdmin = await this.adminsRepo.findById(uid, {
       includeDeleted: true,
@@ -253,14 +253,23 @@ export class AdminsAdminService {
       throw new BadRequestException('該 Firebase Auth 帳號沒有電子郵件地址');
     }
 
-    // 4. 設定 Custom Claims
+    // 4. 讀取現有的 Custom Claims（避免覆蓋其他角色）
+    const originalClaims = authUser.customClaims || {};
+
+    // 5. 合併新的 claim（不覆蓋現有的 claims）
+    const updatedClaims = {
+      ...originalClaims,
+      admin: true,
+    };
+
+    // 6. 設定合併後的 Custom Claims
     try {
-      await this.auth.setCustomUserClaims(uid, { admin: true });
+      await this.auth.setCustomUserClaims(uid, updatedClaims);
     } catch (error) {
       throw new InternalServerErrorException('設定管理員權限失敗');
     }
 
-    // 5. 在 Firestore 建立管理員記錄
+    // 7. 在 Firestore 建立管理員記錄
     try {
       const admin = await this.adminsRepo.create(uid, {
         email: authUser.email,
@@ -270,9 +279,9 @@ export class AdminsAdminService {
 
       return admin;
     } catch (error) {
-      // 如果 Firestore 創建失敗，回滾 Custom Claims
+      // 如果 Firestore 創建失敗，恢復原始 Custom Claims
       try {
-        await this.auth.setCustomUserClaims(uid, { admin: false });
+        await this.auth.setCustomUserClaims(uid, originalClaims);
       } catch (rollbackError) {
         console.error(`回滾 Custom Claims 失敗: ${rollbackError.message}`);
       }

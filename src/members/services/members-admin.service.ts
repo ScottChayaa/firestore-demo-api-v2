@@ -301,14 +301,23 @@ export class MembersAdminService {
       throw new BadRequestException('該 Firebase Auth 帳號沒有電子郵件地址');
     }
 
-    // 4. 設定 Custom Claims
+    // 4. 讀取現有的 Custom Claims（避免覆蓋其他角色）
+    const originalClaims = authUser.customClaims || {};
+
+    // 5. 合併新的 claim（不覆蓋現有的 claims）
+    const updatedClaims = {
+      ...originalClaims,
+      member: true,
+    };
+
+    // 6. 設定合併後的 Custom Claims
     try {
-      await this.auth.setCustomUserClaims(uid, { member: true });
+      await this.auth.setCustomUserClaims(uid, updatedClaims);
     } catch (error) {
       throw new InternalServerErrorException('設定會員權限失敗');
     }
 
-    // 5. 在 Firestore 建立會員記錄
+    // 7. 在 Firestore 建立會員記錄
     try {
       const member = await this.membersRepo.create(uid, {
         email: authUser.email,
@@ -319,9 +328,9 @@ export class MembersAdminService {
 
       return member;
     } catch (error) {
-      // 如果 Firestore 創建失敗，回滾 Custom Claims
+      // 如果 Firestore 創建失敗，恢復原始 Custom Claims
       try {
-        await this.auth.setCustomUserClaims(uid, { member: false });
+        await this.auth.setCustomUserClaims(uid, originalClaims);
       } catch (rollbackError) {
         console.error(`回滾 Custom Claims 失敗: ${rollbackError.message}`);
       }

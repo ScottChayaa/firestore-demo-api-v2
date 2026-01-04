@@ -11,6 +11,7 @@ import axios from 'axios';
 import { RegisterDto } from './dto/register.dto';
 import { SignInDto } from './dto/sign-in.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
+import { PinoLogger, InjectPinoLogger } from 'nestjs-pino';
 
 @Injectable()
 export class AuthService {
@@ -20,6 +21,7 @@ export class AuthService {
     @Inject('FIREBASE_APP') private firebaseApp: admin.app.App,
     @Inject('FIRESTORE') private firestore: admin.firestore.Firestore,
     private configService: ConfigService,
+    private readonly logger: PinoLogger,
   ) {
     this.webApiKey = this.configService.get<string>('firebase.webApiKey');
   }
@@ -138,9 +140,11 @@ export class AuthService {
       const decodedToken = await this.firebaseApp
         .auth()
         .verifyIdToken(response.data.idToken);
-
+      console.log(decodedToken);
       if (!decodedToken.admin) {
+        this.logger.warn('您沒有管理員權限');
         throw new UnauthorizedException('您沒有管理員權限');
+        
       }
 
       return {

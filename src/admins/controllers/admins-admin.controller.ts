@@ -20,7 +20,7 @@ import { AdminsAdminService } from '../services/admins-admin.service';
 import { CreateAdminDto } from '../dto/create-admin.dto';
 import { UpdateAdminDto } from '../dto/update-admin.dto';
 import { AdminQueryDto } from '../dto/admin-query.dto';
-import { CreateAdminRoleDto } from '../dto/create-admin-role.dto';
+import { AssignAdminRoleDto } from '../dto/assign-admin-role.dto';
 import { Admin } from '../entities/admin.entity';
 import { PaginationResult } from '../../common/pagination/pagination.interface';
 import { PinoLogger, InjectPinoLogger } from 'nestjs-pino';
@@ -146,14 +146,14 @@ export class AdminsAdminController {
   }
 
   /**
-   * POST /api/admin/admins/create-role
+   * POST /api/admin/admins/assign-role
    * 賦予現有 Firebase Auth 帳號管理員角色
    */
-  @Post('create-role')
+  @Post('assign-role')
   @HttpCode(HttpStatus.CREATED)
-  async createAdminRole(@Body() dto: CreateAdminRoleDto) {
+  async assignAdminRole(@Body() dto: AssignAdminRoleDto) {
     this.logger.info({ uid: dto.uid, name: dto.name }, '賦予管理員角色請求');
-    const admin = await this.adminsAdminService.createAdminRole(
+    const admin = await this.adminsAdminService.assignAdminRole(
       dto.uid,
       dto.name,
     );
