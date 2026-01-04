@@ -1,6 +1,6 @@
 @baseUrl = http://localhost:8080
 @contentType = application/json
-@adminToken = Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6ImEzOGVhNmEwNDA4YjBjYzVkYTE4OWRmYzg4ODgyZDBmMWI3ZmJmMGUiLCJ0eXAiOiJKV1QifQ.eyJuYW1lIjoiYWRtaW4iLCJhZG1pbiI6dHJ1ZSwiaXNzIjoiaHR0cHM6Ly9zZWN1cmV0b2tlbi5nb29nbGUuY29tL2xpYW5nLWRldiIsImF1ZCI6ImxpYW5nLWRldiIsImF1dGhfdGltZSI6MTc2NzM1MTMxMCwidXNlcl9pZCI6ImhlUGVIQ3hzVkxNcGFydVZjeHJPdkQzS0pNRDIiLCJzdWIiOiJoZVBlSEN4c1ZMTXBhcnVWY3hyT3ZEM0tKTUQyIiwiaWF0IjoxNzY3MzUxMzEwLCJleHAiOjE3NjczNTQ5MTAsImVtYWlsIjoiYWRtaW5AZXhhbXBsZS5jb20iLCJlbWFpbF92ZXJpZmllZCI6ZmFsc2UsImZpcmViYXNlIjp7ImlkZW50aXRpZXMiOnsiZW1haWwiOlsiYWRtaW5AZXhhbXBsZS5jb20iXX0sInNpZ25faW5fcHJvdmlkZXIiOiJwYXNzd29yZCJ9fQ.TM-FZxx6aKeyS_6oqykKjvg5nsDcV5L7ltkOqSxo-ZfTXGeBmRtEoWqdnqEeG2rkVdtrIpjG2w7JLUqSQgcJmqY8ahmUuFOoHQXwcq8uAmFxB-r9HYhH5nFr6cBtRfpE0oO7RJPRogi6U2t7m7e95dreGfaYLC-t1vvCwodrEHHOhMIaypZ5mm6kM7MsVQfYBeXviilILiLJdbahmFt5PiZ-ky2XknDaJl_89SplBQKe-MkZ4jYB7HGOepGfMVVTE1CEclSp_M0JjUa_weTxaF_Rjt0lYTdSmTm_H9jQq76ur8AdHv3PtuLgpmWRBfzXNfOx_leN0EwWz2CcmoaJhA
+@adminToken = Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6ImEzOGVhNmEwNDA4YjBjYzVkYTE4OWRmYzg4ODgyZDBmMWI3ZmJmMGUiLCJ0eXAiOiJKV1QifQ.eyJuYW1lIjoiYWRtaW4iLCJhZG1pbiI6dHJ1ZSwiaXNzIjoiaHR0cHM6Ly9zZWN1cmV0b2tlbi5nb29nbGUuY29tL2xpYW5nLWRldiIsImF1ZCI6ImxpYW5nLWRldiIsImF1dGhfdGltZSI6MTc2NzUwOTI4OCwidXNlcl9pZCI6ImhlUGVIQ3hzVkxNcGFydVZjeHJPdkQzS0pNRDIiLCJzdWIiOiJoZVBlSEN4c1ZMTXBhcnVWY3hyT3ZEM0tKTUQyIiwiaWF0IjoxNzY3NTA5Mjg4LCJleHAiOjE3Njc1MTI4ODgsImVtYWlsIjoiYWRtaW5AZXhhbXBsZS5jb20iLCJlbWFpbF92ZXJpZmllZCI6ZmFsc2UsImZpcmViYXNlIjp7ImlkZW50aXRpZXMiOnsiZW1haWwiOlsiYWRtaW5AZXhhbXBsZS5jb20iXX0sInNpZ25faW5fcHJvdmlkZXIiOiJwYXNzd29yZCJ9fQ.D9k6vEPXpfxyBwopFG4Q2YnayMh9Y11M6-3_PK1DoPdIdf1xBPeIU3Sei4DXq4QTh4PV2JG-2eP_G8pnGaBKhAKmrJxS0JF6HfkH8e87HVsTNIRYjFPnw8hPbPTrXTuRTbxT4ReE8gKEukhExsDd7gms9OZk8hVDvvqVjhaW0LDuh6-pHG02w6MDrMmbJOFQXTM6kEj2ToQWFrVnDfVPqyRtj4M1puxDNXlwfnlrCmDq5LoKWMIOksf6q3bKPj1cLYkzB659ctWSbiqGGNNhiGV2hkkZk6YrFNGrYTwRLjUwHhJYxzLxbtNVtRUNW522wU1kqSXi-XVxl7HVuGTxAg
 
 ### ============================================
 ### 管理員登入（Email/Password 直接取得含管理員角色的 ID Token）
@@ -128,9 +128,13 @@ Authorization: {{adminToken}}
 GET {{baseUrl}}/api/admin/members?includeDeleted=true&limit=3
 Content-Type: {{contentType}}
 Authorization: {{adminToken}}
+###
+GET {{baseUrl}}/api/admin/members?includeDeleted=true&limit=3&cursor=members/Av1EQfEpZtWdYLQvvFmJXEVtO6l1
+Content-Type: {{contentType}}
+Authorization: {{adminToken}}
 
 ### ============================================
-### 會員管理 - 查詢會員列表（僅啟用）          TODO: Boolean 都有異常
+### 會員管理 - 查詢會員列表（僅啟用）
 ### ============================================
 GET {{baseUrl}}/api/admin/members?includeDeleted=false&isActive=false&limit=11
 Content-Type: {{contentType}}
