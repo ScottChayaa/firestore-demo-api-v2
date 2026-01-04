@@ -282,7 +282,7 @@ Authorization: {{adminToken}}
 ### ============================================
 ### 訂單管理 - 查詢所有訂單（日期範圍）
 ### ============================================
-GET {{baseUrl}}/api/admin/orders?startDate=2025-01-01&endDate=2025-12-31
+GET {{baseUrl}}/api/admin/orders?startDate=2026-01-01&endDate=2026-12-31
 Content-Type: {{contentType}}
 Authorization: {{adminToken}}
 
@@ -303,7 +303,7 @@ Authorization: {{adminToken}}
 ### ============================================
 ### 訂單管理 - 查詢單一訂單
 ### ============================================
-GET {{baseUrl}}/api/admin/orders/ORDER_ID_HERE
+GET {{baseUrl}}/api/admin/orders/wdzT8mrRtsqzYMibqO5e
 Content-Type: {{contentType}}
 Authorization: {{adminToken}}
 
