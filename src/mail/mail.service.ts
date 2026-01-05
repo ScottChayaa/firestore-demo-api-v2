@@ -26,11 +26,12 @@ export class MailService {
     const pass = this.configService.get<string>('smtp.password');
     this.fromEmail = this.configService.get<string>('smtp.fromEmail');
     this.fromName = this.configService.get<string>('smtp.fromName');
-
+    
     this.transporter = nodemailer.createTransport({
       host,
       port,
       secure: port === 465, // SSL 需要 port 465
+      requireTLS: port === 587, // STARTTLS 需要 port 587
       auth: {
         user,
         pass,
