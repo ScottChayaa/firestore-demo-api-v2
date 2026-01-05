@@ -16,8 +16,12 @@ Content-Type: {{contentType}}
   "name": "蘋果",
   "phone": "0912345678"
 }
-###
+### 測試帶 params 的 URI
 GET {{baseUrl}}/api/test/users/112233
+### 測試帶多個 params 的 URI
+GET {{baseUrl}}/api/test/users/112233/orders/order112233
+### 測試帶多個 params 的 URI
+GET {{baseUrl}}/api/test/error/500
 
 ### ============================================
 ### 註冊

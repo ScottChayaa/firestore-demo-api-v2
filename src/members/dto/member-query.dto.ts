@@ -29,10 +29,10 @@ export class MemberQueryDto extends PaginationDto {
   includeDeleted?: boolean;
 
   /**
-   * 筛选启用/停用状态
-   * true: 仅启用会员
-   * false: 仅停用会员
-   * undefined: 所有会员
+   * 篩選啟用/停用狀態
+   * true: 僅啟用會員
+   * false: 僅停用會員
+   * undefined: 所有會員
    */
   @IsOptional()
   @ToBoolean()
