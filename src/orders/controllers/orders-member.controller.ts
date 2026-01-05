@@ -13,10 +13,10 @@ import * as admin from 'firebase-admin';
 @Controller('member/orders')
 @UseGuards(FirebaseAuthGuard, RolesGuard)
 @Roles('member')
-export class MemberOrdersController {
+export class OrdersMemberController {
   constructor(
     private readonly ordersService: OrdersService,
-    @InjectPinoLogger(MemberOrdersController.name)
+    @InjectPinoLogger(OrdersMemberController.name)
     private readonly logger: PinoLogger,
   ) {}
 

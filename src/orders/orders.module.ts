@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { OrdersService } from './services/orders.service';
 import { OrdersRepository } from './repositories/orders.repository';
 import { OrdersAdminController } from './controllers/orders-admin.controller';
-import { MemberOrdersController } from './controllers/member-orders.controller';
+import { OrdersMemberController } from './controllers/orders-member.controller';
 
 /**
  * 訂單模組
@@ -11,7 +11,7 @@ import { MemberOrdersController } from './controllers/member-orders.controller';
  * - 會員可以查詢自己的訂單
  */
 @Module({
-  controllers: [OrdersAdminController, MemberOrdersController],
+  controllers: [OrdersAdminController, OrdersMemberController],
   providers: [OrdersService, OrdersRepository],
   exports: [OrdersService], // 匯出 Service 供其他模組使用（例如 Mail Module）
 })

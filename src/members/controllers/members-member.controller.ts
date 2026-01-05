@@ -3,7 +3,7 @@ import { FirebaseAuthGuard } from '../../common/guards/firebase-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
-import { MemberService } from '../services/member.service';
+import { MembersMemberService } from '../services/members-member.service';
 import { UpdateMemberProfileDto } from '../dto/update-member-profile.dto';
 import { Member } from '../entities/member.entity';
 import { PinoLogger, InjectPinoLogger } from 'nestjs-pino';
@@ -17,10 +17,10 @@ import * as admin from 'firebase-admin';
 @Controller('member')
 @UseGuards(FirebaseAuthGuard, RolesGuard)
 @Roles('member')
-export class MemberController {
+export class MembersMemberController {
   constructor(
-    private readonly memberService: MemberService,
-    @InjectPinoLogger(MemberController.name)
+    private readonly memberService: MembersMemberService,
+    @InjectPinoLogger(MembersMemberController.name)
     private readonly logger: PinoLogger,
   ) {}
 

@@ -9,10 +9,10 @@ import { PinoLogger, InjectPinoLogger } from 'nestjs-pino';
  * 處理會員自己的資料查詢和更新
  */
 @Injectable()
-export class MemberService {
+export class MembersMemberService {
   constructor(
     private readonly membersRepo: MembersRepository,
-    @InjectPinoLogger(MemberService.name)
+    @InjectPinoLogger(MembersMemberService.name)
     private readonly logger: PinoLogger,
   ) {}
 
