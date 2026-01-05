@@ -61,6 +61,12 @@ export default () => {
       password: config.SMTP_PASSWORD,
       fromEmail: config.SMTP_FROM_EMAIL,
       fromName: config.SMTP_FROM_NAME || 'Firestore Demo API',
+
+      // Timeout 配置
+      connectionTimeout: parseInt(config.SMTP_CONNECTION_TIMEOUT, 10) || 10000,  // 10 秒
+      greetingTimeout: parseInt(config.SMTP_GREETING_TIMEOUT, 10) || 10000,      // 10 秒
+      socketTimeout: parseInt(config.SMTP_SOCKET_TIMEOUT, 10) || 30000,          // 30 秒
+      authTimeout: parseInt(config.SMTP_AUTH_TIMEOUT, 10) || 15000,              // 15 秒
     },
 
     // Rate Limiting Configuration

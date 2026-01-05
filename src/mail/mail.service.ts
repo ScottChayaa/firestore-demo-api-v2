@@ -35,6 +35,16 @@ export class MailService {
         user,
         pass,
       },
+
+      // Timeout 配置
+      connectionTimeout: this.configService.get<number>('smtp.connectionTimeout'),
+      greetingTimeout: this.configService.get<number>('smtp.greetingTimeout'),
+      socketTimeout: this.configService.get<number>('smtp.socketTimeout'),
+
+      // 連接池優化
+      pool: true,
+      maxConnections: 5,
+      maxMessages: 100,
     });
 
     this.logger.info(
@@ -77,8 +87,23 @@ export class MailService {
         rejected: info.rejected as string[],
       };
     } catch (error) {
-      this.logger.error({ to: dto.to, error: error.message }, '郵件發送失敗');
-      throw new InternalServerErrorException('郵件發送失敗');
+      // 根據錯誤類型提供更具體的訊息
+      let errorMessage = '郵件發送失敗';
+
+      if (error.message.includes('timeout') || error.message.includes('ETIMEDOUT')) {
+        errorMessage = '郵件發送超時。SMTP 伺服器無響應，請稍後再試';
+        this.logger.warn({ to: dto.to, error: error.message }, '郵件發送超時');
+      } else if (error.message.includes('ECONNREFUSED') || error.message.includes('EHOSTUNREACH')) {
+        errorMessage = '無法連接到郵件伺服器。請檢查網絡配置';
+        this.logger.error({ to: dto.to, error: error.message }, '伺服器連接失敗');
+      } else if (error.message.includes('EAUTH') || error.message.includes('Invalid login')) {
+        errorMessage = '郵件伺服器認證失敗。請檢查 SMTP 配置';
+        this.logger.error({ to: dto.to, error: error.message }, '認證失敗');
+      } else {
+        this.logger.error({ to: dto.to, error: error.message }, '郵件發送失敗');
+      }
+
+      throw new InternalServerErrorException(errorMessage);
     }
   }
 
