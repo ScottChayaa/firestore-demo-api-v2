@@ -147,7 +147,7 @@ export class ProductsRepository {
    * 建立產品
    */
   async create(
-    data: Omit<Product, 'id' | 'createdAt' | 'updatedAt'>,
+    data: Omit<Product, 'id' | 'isActive' | 'createdAt' | 'updatedAt' | 'deletedAt' | 'deletedBy'>,
   ): Promise<Product> {
     const docRef = this.firestore.collection('products').doc();
 
