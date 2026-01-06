@@ -20,7 +20,9 @@ export class OrdersRepository {
    * 建立訂單
    * 自動生成訂單編號和設定時間戳
    */
-  async create(data: CreateOrderDto): Promise<Order> {
+  async create(
+    data: Omit<Order, 'id' | 'orderNumber' | 'totalAmount' | 'status' | 'createdAt' | 'updatedAt'>,
+  ): Promise<Order> {
     const orderNumber = this.generateOrderNumber();
     const now = admin.firestore.Timestamp.now();
 
@@ -43,7 +45,7 @@ export class OrdersRepository {
       memberId: data.memberId,
       items: plainItems,
       totalAmount,
-      status: 'pending',
+      status: 'pending' as const,
       createdAt: now,
       updatedAt: now,
     };
