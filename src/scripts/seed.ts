@@ -53,6 +53,8 @@ async function bootstrap() {
         stock: Math.floor(Math.random() * 100) + 10,
         imageUrl: `https://picsum.photos/400/300?random=${i}`,
         isActive: Math.random() > 0.1, // 90% 啟用
+        deletedAt: null,
+        deletedBy: null,
         createdAt: admin.firestore.Timestamp.now(),
         updatedAt: admin.firestore.Timestamp.now(),
       };

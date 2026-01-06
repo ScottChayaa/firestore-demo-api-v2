@@ -349,3 +349,138 @@ Authorization: {{adminToken}}
 DELETE {{baseUrl}}/api/admin/orders/bHjjjzRktfORAicGbhWI
 Content-Type: {{contentType}}
 Authorization: {{adminToken}}
+
+### ============================================
+### 產品管理 - 查詢產品列表（基本）
+### ============================================
+GET {{baseUrl}}/api/admin/products
+Content-Type: {{contentType}}
+Authorization: {{adminToken}}
+
+### ============================================
+### 產品管理 - 查詢產品列表（分頁）
+### ============================================
+GET {{baseUrl}}/api/admin/products?limit=10
+Content-Type: {{contentType}}
+Authorization: {{adminToken}}
+
+### ============================================
+### 產品管理 - 查詢產品列表（依分類篩選）
+### ============================================
+GET {{baseUrl}}/api/admin/products?category=electronics
+Content-Type: {{contentType}}
+Authorization: {{adminToken}}
+
+### ============================================
+### 產品管理 - 查詢產品列表（價格範圍）
+### ============================================
+GET {{baseUrl}}/api/admin/products?minPrice=100&maxPrice=5000
+Content-Type: {{contentType}}
+Authorization: {{adminToken}}
+
+### ============================================
+### 產品管理 - 查詢產品列表（庫存範圍）
+### ============================================
+GET {{baseUrl}}/api/admin/products?minStock=0&maxStock=10
+Content-Type: {{contentType}}
+Authorization: {{adminToken}}
+
+### ============================================
+### 產品管理 - 查詢產品列表（僅啟用）
+### ============================================
+GET {{baseUrl}}/api/admin/products?isActive=true
+Content-Type: {{contentType}}
+Authorization: {{adminToken}}
+
+### ============================================
+### 產品管理 - 查詢產品列表（僅停用）
+### ============================================
+GET {{baseUrl}}/api/admin/products?isActive=false
+Content-Type: {{contentType}}
+Authorization: {{adminToken}}
+
+### ============================================
+### 產品管理 - 查詢產品列表（包含已刪除）
+### ============================================
+GET {{baseUrl}}/api/admin/products?includeDeleted=true
+Content-Type: {{contentType}}
+Authorization: {{adminToken}}
+
+### ============================================
+### 產品管理 - 查詢產品列表（複合條件 + 排序）
+### ============================================
+GET {{baseUrl}}/api/admin/products?category=electronics&minPrice=100&maxPrice=5000&orderBy=price&order=asc
+Content-Type: {{contentType}}
+Authorization: {{adminToken}}
+
+### ============================================
+### 產品管理 - 建立產品
+### ============================================
+POST {{baseUrl}}/api/admin/products
+Content-Type: {{contentType}}
+Authorization: {{adminToken}}
+
+{
+  "name": "測試產品",
+  "description": "這是一個測試產品",
+  "price": 999,
+  "category": "electronics",
+  "stock": 100,
+  "imageUrl": "https://picsum.photos/400/300"
+}
+
+### ============================================
+### 產品管理 - 取得所有分類
+### ============================================
+GET {{baseUrl}}/api/admin/products/categories
+Content-Type: {{contentType}}
+Authorization: {{adminToken}}
+###
+GET {{baseUrl}}/api/admin/products/categories?includeDeleted=true
+Content-Type: {{contentType}}
+Authorization: {{adminToken}}
+
+### ============================================
+### 產品管理 - 查詢單一產品
+### ============================================
+GET {{baseUrl}}/api/admin/products/PRODUCT_ID_HERE
+Content-Type: {{contentType}}
+Authorization: {{adminToken}}
+###
+GET {{baseUrl}}/api/admin/products/PRODUCT_ID_HERE?includeDeleted=true
+Content-Type: {{contentType}}
+Authorization: {{adminToken}}
+
+### ============================================
+### 產品管理 - 更新產品
+### ============================================
+PUT {{baseUrl}}/api/admin/products/PRODUCT_ID_HERE
+Content-Type: {{contentType}}
+Authorization: {{adminToken}}
+
+{
+  "name": "更新後的產品名稱",
+  "price": 1299,
+  "stock": 50
+}
+
+### ============================================
+### 產品管理 - 刪除產品（軟刪除）
+### ============================================
+DELETE {{baseUrl}}/api/admin/products/PRODUCT_ID_HERE
+Content-Type: {{contentType}}
+Authorization: {{adminToken}}
+
+### ============================================
+### 產品管理 - 切換產品啟用/停用狀態
+### ============================================
+PATCH {{baseUrl}}/api/admin/products/PRODUCT_ID_HERE/toggle-status
+Content-Type: {{contentType}}
+Authorization: {{adminToken}}
+
+### ============================================
+### 產品管理 - 恢復已軟刪除的產品
+### ============================================
+POST {{baseUrl}}/api/admin/products/PRODUCT_ID_HERE/restore
+Content-Type: {{contentType}}
+Authorization: {{adminToken}}
