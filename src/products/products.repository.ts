@@ -17,13 +17,13 @@ export class ProductsRepository {
    * 支援前台和後台查詢
    */
   async findAll(
-    query: ProductQueryDto | AdminProductQueryDto,
+    queryDto: ProductQueryDto | AdminProductQueryDto,
   ): Promise<PaginationResult<Product>> {
     let firestoreQuery: admin.firestore.Query =
       this.firestore.collection('products');
 
     // 檢查是否為管理端查詢
-    const isAdminQuery = 'includeDeleted' in query || 'isActive' in query;
+    const isAdminQuery = 'includeDeleted' in queryDto || 'isActive' in queryDto;
 
     // 前台查詢自動排除已刪除和停用的產品
     if (!isAdminQuery) {
@@ -31,7 +31,7 @@ export class ProductsRepository {
       firestoreQuery = firestoreQuery.where('isActive', '==', true);
     } else {
       // 管理端查詢：根據參數決定
-      const adminQuery = query as AdminProductQueryDto;
+      const adminQuery = queryDto as AdminProductQueryDto;
 
       // 預設排除已刪除的產品
       if (!adminQuery.includeDeleted) {
@@ -65,29 +65,29 @@ export class ProductsRepository {
     }
 
     // 分類篩選（前台和後台共用）
-    if (query.category) {
-      firestoreQuery = firestoreQuery.where('category', '==', query.category);
+    if (queryDto.category) {
+      firestoreQuery = firestoreQuery.where('category', '==', queryDto.category);
     }
 
     // 價格篩選（前台和後台共用）
-    if (query.minPrice !== undefined) {
-      firestoreQuery = firestoreQuery.where('price', '>=', query.minPrice);
+    if (queryDto.minPrice !== undefined) {
+      firestoreQuery = firestoreQuery.where('price', '>=', queryDto.minPrice);
     }
-    if (query.maxPrice !== undefined) {
-      firestoreQuery = firestoreQuery.where('price', '<=', query.maxPrice);
+    if (queryDto.maxPrice !== undefined) {
+      firestoreQuery = firestoreQuery.where('price', '<=', queryDto.maxPrice);
     }
 
     // 排序欄位（預設 createdAt）
-    const orderBy = query.orderBy || 'createdAt';
-    const order = query.order || 'desc';
+    const orderBy = queryDto.orderBy || 'createdAt';
+    const order = queryDto.order || 'desc';
     firestoreQuery = firestoreQuery.orderBy(orderBy, order);
 
     // 執行分頁查詢（使用 mapToEntity 转换 Firestore Timestamp 为 Date）
     return PaginationHelper.paginate<Product>(
       firestoreQuery,
       {
-        cursor: query.cursor,
-        limit: query.limit,
+        cursor: queryDto.cursor,
+        limit: queryDto.limit,
       },
       (doc) => this.mapToEntity(doc),
     );
