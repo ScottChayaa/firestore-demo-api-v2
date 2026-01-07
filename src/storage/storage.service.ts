@@ -1,0 +1,133 @@
+import { Injectable, Inject, NotFoundException, BadRequestException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { PinoLogger, InjectPinoLogger } from 'nestjs-pino';
+import { Bucket } from '@google-cloud/storage';
+import { randomUUID } from 'crypto';
+import { GenerateUploadUrlDto } from './dto/generate-upload-url.dto';
+
+@Injectable()
+export class StorageService {
+  constructor(
+    @Inject('STORAGE') private readonly bucket: Bucket,
+    private readonly configService: ConfigService,
+    @InjectPinoLogger(StorageService.name) private readonly logger: PinoLogger,
+  ) {}
+
+  /**
+   * 生成上傳用的 Signed URL
+   */
+  async generateUploadUrl(dto: GenerateUploadUrlDto): Promise<{
+    uploadUrl: string;
+    filePath: string;
+    cdnUrl: string;
+    expiresAt: Date;
+  }> {
+    // 1. 驗證檔案類型和大小
+    this.validateFile(dto);
+
+    // 2. 生成檔案路徑
+    const filePath = this.generateFilePath(dto);
+
+    // 3. 取得 GCS File 物件
+    const file = this.bucket.file(filePath);
+
+    // 4. 生成 Signed URL
+    const expiresMinutes = this.configService.get<number>('storage.signedUrlExpiresMinutes');
+    const expiresAt = new Date(Date.now() + expiresMinutes * 60 * 1000);
+
+    const [signedUrl] = await file.getSignedUrl({
+      version: 'v4',
+      action: 'write',
+      expires: expiresAt,
+      contentType: dto.contentType,
+    });
+
+    // 5. 生成 CDN URL
+    const cdnUrl = this.getCdnUrl(filePath);
+
+    this.logger.info({ filePath, expiresAt }, '生成上傳 URL 成功');
+
+    return {
+      uploadUrl: signedUrl,
+      filePath,
+      cdnUrl,
+      expiresAt,
+    };
+  }
+
+  /**
+   * 刪除檔案
+   */
+  async deleteFile(filePath: string): Promise<void> {
+    const file = this.bucket.file(filePath);
+
+    // 檢查檔案是否存在
+    const [exists] = await file.exists();
+    if (!exists) {
+      throw new NotFoundException(`檔案不存在: ${filePath}`);
+    }
+
+    await file.delete();
+    this.logger.info({ filePath }, '檔案刪除成功');
+  }
+
+  /**
+   * 生成檔案路徑
+   * 格式: {prefix}/{category}/{year}/{month}/{uuid}-{sanitizedFileName}
+   */
+  private generateFilePath(dto: GenerateUploadUrlDto): string {
+    const prefix = this.configService.get<string>('storage.filePathPrefix');
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const uuid = randomUUID();
+    const sanitizedFileName = this.sanitizeFileName(dto.fileName);
+
+    return `${prefix}/${dto.category}/${year}/${month}/${uuid}-${sanitizedFileName}`;
+  }
+
+  /**
+   * 取得 CDN URL
+   */
+  private getCdnUrl(filePath: string): string {
+    const bucketName = this.configService.get<string>('storage.bucketName');
+    return `https://storage.googleapis.com/${bucketName}/${filePath}`;
+  }
+
+  /**
+   * 驗證檔案
+   */
+  private validateFile(dto: GenerateUploadUrlDto): void {
+    const allowedTypes = this.configService.get<string[]>('storage.allowedFileTypes');
+    const maxSizeMB = this.configService.get<number>('storage.maxFileSizeMB');
+    const maxSizeBytes = maxSizeMB * 1024 * 1024;
+
+    if (!allowedTypes.includes(dto.contentType)) {
+      throw new BadRequestException(`不支援的檔案類型: ${dto.contentType}`);
+    }
+
+    if (dto.fileSize > maxSizeBytes) {
+      throw new BadRequestException(`檔案大小超過限制 (${maxSizeMB}MB)`);
+    }
+  }
+
+  /**
+   * 清理檔案名稱（移除特殊字元）
+   */
+  private sanitizeFileName(fileName: string): string {
+    // 移除路徑遍歷字元
+    let sanitized = fileName.replace(/\.\./g, '');
+
+    // 移除特殊字元，只保留字母、數字、底線、連字號、點
+    sanitized = sanitized.replace(/[^a-zA-Z0-9_.-]/g, '-');
+
+    // 限制長度（保留副檔名）
+    const maxLength = 100;
+    if (sanitized.length > maxLength) {
+      const ext = sanitized.substring(sanitized.lastIndexOf('.'));
+      sanitized = sanitized.substring(0, maxLength - ext.length) + ext;
+    }
+
+    return sanitized;
+  }
+}

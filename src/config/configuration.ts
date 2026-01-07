@@ -82,5 +82,19 @@ export default () => {
       ordersCount: parseInt(config.SEED_ORDERS_COUNT, 10) || 50,
       productsCount: parseInt(config.SEED_PRODUCTS_COUNT, 10) || 10,
     },
+
+    // Google Cloud Storage Configuration
+    storage: {
+      bucketName: config.GCS_BUCKET_NAME || `${config.FIREBASE_PROJECT_ID}.appspot.com`,
+      signedUrlExpiresMinutes: parseInt(config.GCS_SIGNED_URL_EXPIRES_MINUTES, 10) || 15,
+      allowedFileTypes: config.GCS_ALLOWED_FILE_TYPES?.split(',') || [
+        'image/jpeg',
+        'image/png',
+        'image/gif',
+        'image/webp',
+      ],
+      maxFileSizeMB: parseInt(config.GCS_MAX_FILE_SIZE_MB, 10) || 5,
+      filePathPrefix: config.GCS_FILE_PATH_PREFIX || 'uploads',
+    },
   };
 };

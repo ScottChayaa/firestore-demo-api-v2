@@ -1,4 +1,5 @@
 import { NestFactory } from '@nestjs/core';
+import { NestExpressApplication } from '@nestjs/platform-express';
 import { ConfigService } from '@nestjs/config';
 import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
@@ -6,12 +7,16 @@ import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 import { ThrottlerExceptionFilter } from './common/filters/throttler-exception.filter';
 import { Logger } from 'nestjs-pino';
 import helmet from 'helmet';
+import { join } from 'path';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule, { bufferLogs: true });
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, { bufferLogs: true });
 
   // 使用 Pino Logger
   app.useLogger(app.get(Logger));
+
+  // 配置靜態檔案服務（用於測試頁面）
+  app.useStaticAssets(join(__dirname, '..', 'public'));
 
   // 取得 ConfigService
   const configService = app.get(ConfigService);

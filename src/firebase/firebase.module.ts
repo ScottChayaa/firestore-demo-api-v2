@@ -90,7 +90,24 @@ import { readFileSync } from 'fs';
       },
       inject: ['FIREBASE_APP'],
     },
+    {
+      provide: 'STORAGE',
+      useFactory: (app: admin.app.App | null, configService: ConfigService) => {
+        if (!app) {
+          console.warn(
+            '⚠️  Firebase Storage not available (Firebase not initialized)',
+          );
+          return null;
+        }
+
+        const bucketName = configService.get<string>('storage.bucketName');
+        const bucket = app.storage().bucket(bucketName);
+        console.log(`✅ Firebase Storage initialized with bucket: ${bucketName}`);
+        return bucket;
+      },
+      inject: ['FIREBASE_APP', ConfigService],
+    },
   ],
-  exports: ['FIREBASE_APP', 'FIRESTORE', 'FIREBASE_AUTH'],
+  exports: ['FIREBASE_APP', 'FIRESTORE', 'FIREBASE_AUTH', 'STORAGE'],
 })
 export class FirebaseModule {}

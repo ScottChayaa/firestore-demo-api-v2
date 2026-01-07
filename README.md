@@ -13,6 +13,7 @@
 - 📦 **商品管理** - 公開 API、分類篩選、庫存管理
 - 📋 **訂單系統** - 多條件查詢、狀態管理、自動編號生成
 - 📧 **郵件服務** - Nodemailer + SMTP、歡迎郵件、密碼重置
+- 📸 **圖片上傳** - GCS Signed URL 上傳、CDN 加速、檔案管理
 
 ### 技術特色
 - 🔄 **Cursor-based Pagination** - 高效能分頁查詢
@@ -94,14 +95,27 @@ npm run seed
 
 ## API 測試
 
-參考 rest client 範例 : 
+參考 rest client 範例 :
  - [public.example.rest](./rests/public.example.rest) : 公開 API 測試
  - [member.example.rest](./rests/member.example.rest) : 會員 API 測試
  - [admin.example.rest](./rests/admin.example.rest) : 管理員 API 測試
+ - [storage.rest](./rests/storage.rest) : 圖片上傳 API 測試
+
+### 圖片上傳測試頁面
+
+訪問 http://localhost:8080/upload-test.html 進行圖片上傳功能測試
+
+詳細使用說明請參考 [Storage 使用指南](./docs/STORAGE_GUIDE.md)
 
 ---
 
 ## 相關文檔
 
+### 專案文檔
+- [Storage 使用指南](./docs/STORAGE_GUIDE.md) - GCS 圖片上傳功能說明
+- [Storage 實現計劃](./docs/STORAGE_IMPLEMENTATION_PLAN.md) - 技術設計與實施細節
+
+### 外部資源
 - [Firebase Console](https://console.firebase.google.com/)
 - [NestJS 官方文檔](https://docs.nestjs.com/)
+- [GCP 免費方案](https://cloud.google.com/free?hl=zh_tw)

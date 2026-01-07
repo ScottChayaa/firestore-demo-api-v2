@@ -12,6 +12,7 @@ import { MembersModule } from './members/members.module';
 import { AdminsModule } from './admins/admins.module';
 import { OrdersModule } from './orders/orders.module';
 import { MailModule } from './mail/mail.module';
+import { StorageModule } from './storage/storage.module';
 import { randomUUID } from 'crypto';
 
 // Cloud Logging severity mapping
@@ -151,6 +152,7 @@ const SEVERITY_LOOKUP = {
     AdminsModule,
     OrdersModule,
     MailModule,
+    StorageModule,
   ],
   controllers: [AppController],
   providers: [AppService],
