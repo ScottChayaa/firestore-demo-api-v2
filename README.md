@@ -2,18 +2,6 @@
 
 基於 NestJS + Firebase + Firestore 的會員訂單管理系統
 
-## 技術棧
-
-- **Framework**: NestJS v11+
-- **Language**: TypeScript 5.9+
-- **Database**: Firebase Firestore
-- **Authentication**: Firebase Authentication
-- **Logger**: Pino (nestjs-pino)
-- **Validation**: class-validator + class-transformer
-- **Mail Service**: Nodemailer
-- **Rate Limiting**: @nestjs/throttler
-- **Runtime**: Node.js 20+
-
 ---
 
 ## 功能特點
