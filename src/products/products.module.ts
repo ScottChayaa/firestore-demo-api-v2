@@ -4,8 +4,10 @@ import { ProductsService } from './products.service';
 import { ProductsRepository } from './products.repository';
 import { ProductsAdminController } from './controllers/products-admin.controller';
 import { ProductsAdminService } from './services/products-admin.service';
+import { StorageModule } from '../storage/storage.module';
 
 @Module({
+  imports: [StorageModule],
   controllers: [ProductsController, ProductsAdminController],
   providers: [ProductsService, ProductsAdminService, ProductsRepository],
   exports: [ProductsService],

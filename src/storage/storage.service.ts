@@ -72,11 +72,43 @@ export class StorageService {
   }
 
   /**
-   * 生成檔案路徑
-   * 格式: {prefix}/{category}/{year}/{month}/{uuid}-{sanitizedFileName}
+   * 將檔案從暫存區移動到正式區
+   * @param tempFilePath 暫存區檔案路徑（temp/...）
+   * @returns 正式區檔案路徑（uploads/...）
+   */
+  async moveFromTempToPermanent(tempFilePath: string): Promise<string> {
+    // 1. 檢查暫存檔案是否存在
+    const tempFile = this.bucket.file(tempFilePath);
+    const [exists] = await tempFile.exists();
+
+    if (!exists) {
+      throw new NotFoundException(`暫存檔案不存在: ${tempFilePath}`);
+    }
+
+    // 2. 生成正式路徑（將 temp/ 替換為 uploads/）
+    const permanentFilePath = tempFilePath.replace(/^temp\//, 'uploads/');
+    const permanentFile = this.bucket.file(permanentFilePath);
+
+    // 3. 複製檔案到正式區
+    await tempFile.copy(permanentFile);
+
+    // 4. 刪除暫存檔案
+    await tempFile.delete();
+
+    this.logger.info(
+      { from: tempFilePath, to: permanentFilePath },
+      '檔案已移動到正式區',
+    );
+
+    return permanentFilePath;
+  }
+
+  /**
+   * 生成檔案路徑（暫存區）
+   * 格式: temp/{category}/{year}/{month}/{uuid}-{sanitizedFileName}
    */
   private generateFilePath(dto: GenerateUploadUrlDto): string {
-    const prefix = this.configService.get<string>('storage.filePathPrefix');
+    const prefix = 'temp'; // 使用暫存區
     const now = new Date();
     const year = now.getFullYear();
     const month = String(now.getMonth() + 1).padStart(2, '0');

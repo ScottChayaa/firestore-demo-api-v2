@@ -9,10 +9,17 @@ import { UpdateProductDto } from '../dto/update-product.dto';
 import { AdminProductQueryDto } from '../dto/admin-product-query.dto';
 import { Product } from '../entities/product.entity';
 import { PaginationResult } from '../../common/pagination/pagination.interface';
+import { StorageService } from '../../storage/storage.service';
+import { PinoLogger, InjectPinoLogger } from 'nestjs-pino';
 
 @Injectable()
 export class ProductsAdminService {
-  constructor(private readonly productsRepo: ProductsRepository) {}
+  constructor(
+    private readonly productsRepo: ProductsRepository,
+    private readonly storageService: StorageService,
+    @InjectPinoLogger(ProductsAdminService.name)
+    private readonly logger: PinoLogger,
+  ) {}
 
   /**
    * 查詢產品列表
@@ -36,7 +43,28 @@ export class ProductsAdminService {
       throw new BadRequestException('庫存不能為負數');
     }
 
-    return this.productsRepo.create(dto);
+    let finalImageUrl = dto.imageUrl;
+
+    // 如果有圖片且在暫存區，移動到正式區
+    if (dto.imageUrl) {
+      const filePath = this.extractFilePathFromUrl(dto.imageUrl);
+
+      if (filePath.startsWith('temp/')) {
+        const permanentFilePath =
+          await this.storageService.moveFromTempToPermanent(filePath);
+        finalImageUrl = this.storageService.getCdnUrl(permanentFilePath);
+
+        this.logger.info(
+          { tempPath: filePath, permanentPath: permanentFilePath },
+          '產品圖片已移動到正式區',
+        );
+      }
+    }
+
+    return this.productsRepo.create({
+      ...dto,
+      imageUrl: finalImageUrl,
+    });
   }
 
   /**
@@ -150,5 +178,15 @@ export class ProductsAdminService {
    */
   async getCategories(options?: { includeDeleted?: boolean }): Promise<string[]> {
     return this.productsRepo.getCategories(options);
+  }
+
+  /**
+   * 從 CDN URL 提取檔案路徑
+   * @param url CDN URL (https://storage.googleapis.com/bucket-name/temp/product/2026/01/uuid-file.jpg)
+   * @returns filePath (temp/product/2026/01/uuid-file.jpg)
+   */
+  private extractFilePathFromUrl(url: string): string {
+    const match = url.match(/googleapis\.com\/[^/]+\/(.+)$/);
+    return match ? match[1] : '';
   }
 }
