@@ -47,7 +47,7 @@ export class ProductsAdminService {
 
     // 如果有圖片且在暫存區，移動到正式區
     if (dto.imageUrl) {
-      const filePath = this.extractFilePathFromUrl(dto.imageUrl);
+      const filePath = this.storageService.extractFilePathFromUrl(dto.imageUrl);
 
       if (filePath.startsWith('temp/')) {
         const permanentFilePath =
@@ -178,15 +178,5 @@ export class ProductsAdminService {
    */
   async getCategories(options?: { includeDeleted?: boolean }): Promise<string[]> {
     return this.productsRepo.getCategories(options);
-  }
-
-  /**
-   * 從 CDN URL 提取檔案路徑
-   * @param url CDN URL (https://storage.googleapis.com/bucket-name/temp/product/2026/01/uuid-file.jpg)
-   * @returns filePath (temp/product/2026/01/uuid-file.jpg)
-   */
-  private extractFilePathFromUrl(url: string): string {
-    const match = url.match(/googleapis\.com\/[^/]+\/(.+)$/);
-    return match ? match[1] : '';
   }
 }

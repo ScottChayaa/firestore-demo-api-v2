@@ -121,9 +121,19 @@ export class StorageService {
   /**
    * 取得 CDN URL
    */
-  private getCdnUrl(filePath: string): string {
+  getCdnUrl(filePath: string): string {
     const bucketName = this.configService.get<string>('storage.bucketName');
     return `https://storage.googleapis.com/${bucketName}/${filePath}`;
+  }
+
+  /**
+   * 從 CDN URL 提取檔案路徑
+   * @param url CDN URL (https://storage.googleapis.com/bucket-name/temp/product/2026/01/uuid-file.jpg)
+   * @returns filePath (temp/product/2026/01/uuid-file.jpg)
+   */
+  extractFilePathFromUrl(url: string): string {
+    const match = url.match(/googleapis\.com\/[^/]+\/(.+)$/);
+    return match ? match[1] : '';
   }
 
   /**
