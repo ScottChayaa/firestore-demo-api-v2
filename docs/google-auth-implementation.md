@@ -1,10 +1,12 @@
-# Google 第三方登入實作計劃
+# Google 第三方登入實作文件
 
 ## 功能需求
 
-實作 Google 第三方登入功能，讓會員可以透過 Google 帳號登入系統。
+實作 Google 第三方登入功能，讓會員和管理員可以透過 Google 帳號登入系統。
 
 ### 流程設計
+
+#### 會員 Google 登入流程
 
 ```
 1. 前端使用 Firebase SDK 進行 Google 登入 (signInWithPopup)
@@ -16,7 +18,27 @@
 4. 後端驗證 idToken
    ↓
 5. 檢查該 UID 是否存在於 members collection
-   ├─ 不存在 → 建立新會員記錄 + 設定 Custom Claims
+   ├─ 不存在 → 建立新會員記錄 + 設定 Custom Claims (member: true)
+   └─ 已存在 → 檢查並設定 Custom Claims
+   ↓
+6. 使用 Firebase REST API 刷新 token（獲取包含 custom claims 的新 token）
+   ↓
+7. 返回 { idToken, refreshToken, expiresIn, uid, message }
+```
+
+#### 管理員 Google 登入流程
+
+```
+1. 前端使用 Firebase SDK 進行 Google 登入 (signInWithPopup)
+   ↓
+2. 獲得 idToken 和 refreshToken
+   ↓
+3. 調用 POST /api/auth/admin/signInWithGoogle { idToken, refreshToken }
+   ↓
+4. 後端驗證 idToken
+   ↓
+5. 檢查該 UID 是否存在於 admins collection
+   ├─ 不存在 → 建立新管理員記錄 + 設定 Custom Claims (admin: true)
    └─ 已存在 → 檢查並設定 Custom Claims
    ↓
 6. 使用 Firebase REST API 刷新 token（獲取包含 custom claims 的新 token）
@@ -150,26 +172,141 @@ async signInWithGoogle(dto: GoogleSignInDto) {
 - 後端使用 refreshToken 通過 Firebase REST API 獲取新的 idToken
 - 優點：可以立即返回包含 custom claims 的 token，用戶可以立即使用需要 member 權限的 API
 
-### 3. 在 AuthController 新增端點
+### 3. 在 AuthController 新增會員端點
 
 **檔案**: `src/auth/auth.controller.ts`
 
 ```typescript
 /**
- * Google 第三方登入
+ * 會員 Google 第三方登入
  * POST /api/auth/member/signInWithGoogle
  */
 @Public()
 @Post('member/signInWithGoogle')
 async memberSignInWithGoogle(@Body() dto: GoogleSignInDto) {
-  this.logger.info('Google 第三方登入請求');
+  this.logger.info('會員 Google 第三方登入請求');
   const result = await this.authService.signInWithGoogle(dto);
-  this.logger.info({ uid: result.uid }, 'Google 登入成功');
+  this.logger.info({ uid: result.uid }, '會員 Google 登入成功');
   return result;
 }
 ```
 
-### 4. 更新測試頁面
+### 4. 管理員 Google 登入實作
+
+#### 4.1 在 AuthService 新增 adminSignInWithGoogle 方法
+
+**檔案**: `src/auth/auth.service.ts`
+
+```typescript
+/**
+ * 管理員 Google 第三方登入
+ * 1. 驗證 Google idToken
+ * 2. 檢查管理員是否存在，不存在則建立
+ * 3. 設定 Custom Claims（admin 角色）
+ * 4. 刷新 token 並返回
+ */
+async adminSignInWithGoogle(dto: GoogleSignInDto) {
+  try {
+    // 1. 驗證 idToken
+    const decodedToken = await this.firebaseApp.auth().verifyIdToken(dto.idToken);
+
+    const uid = decodedToken.uid;
+    const email = decodedToken.email;
+    const name = decodedToken.name || email?.split('@')[0];
+
+    // 2. 檢查管理員是否已存在於 Firestore
+    const adminDoc = await this.firestore
+      .collection('admins')
+      .doc(uid)
+      .get();
+
+    if (!adminDoc.exists) {
+      // 第一次使用 Google 登入，建立管理員記錄
+      await this.firestore
+        .collection('admins')
+        .doc(uid)
+        .set({
+          email,
+          name,
+          createdAt: admin.firestore.FieldValue.serverTimestamp(),
+          updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+        });
+
+      this.logger.info({ uid, email }, '新管理員透過 Google 登入註冊');
+    }
+
+    // 3. 確保 Custom Claims 已設定（避免重複登入時遺失）
+    if (!decodedToken.admin) {
+      await this.firebaseApp.auth().setCustomUserClaims(uid, {
+        admin: true,
+      });
+
+      this.logger.info({ uid }, '設定管理員 Custom Claims');
+    }
+
+    // 4. 當設定了新的 custom claims 時，需要刷新 token
+    if (!decodedToken.admin || !adminDoc.exists) {
+      // 需要刷新 token（新管理員或缺少 custom claims）
+      const tokenResponse = await axios.post(
+        `https://securetoken.googleapis.com/v1/token?key=${this.webApiKey}`,
+        {
+          grant_type: 'refresh_token',
+          refresh_token: dto.refreshToken,
+        },
+      );
+
+      return {
+        idToken: tokenResponse.data.id_token,
+        refreshToken: tokenResponse.data.refresh_token,
+        expiresIn: tokenResponse.data.expires_in,
+        uid,
+        message: adminDoc.exists ? '登入成功' : '註冊並登入成功',
+      };
+    }
+
+    // 已存在的管理員且已有 custom claims，直接返回原 token
+    return {
+      idToken: dto.idToken,
+      refreshToken: dto.refreshToken,
+      expiresIn: '3600',
+      uid,
+      message: '登入成功',
+    };
+  } catch (error) {
+    this.logger.error({ error: error.message }, '管理員 Google 登入失敗');
+
+    if (error.code === 'auth/id-token-expired') {
+      throw new UnauthorizedException('登入已過期，請重新登入');
+    }
+    if (error.code === 'auth/argument-error') {
+      throw new BadRequestException('無效的 ID Token');
+    }
+
+    throw new UnauthorizedException('管理員 Google 登入失敗');
+  }
+}
+```
+
+#### 4.2 在 AuthController 新增管理員端點
+
+**檔案**: `src/auth/auth.controller.ts`
+
+```typescript
+/**
+ * 管理員 Google 第三方登入
+ * POST /api/auth/admin/signInWithGoogle
+ */
+@Public()
+@Post('admin/signInWithGoogle')
+async adminSignInWithGoogle(@Body() googleSignInDto: GoogleSignInDto) {
+  this.logger.info('管理員 Google 第三方登入請求');
+  const result = await this.authService.adminSignInWithGoogle(googleSignInDto);
+  this.logger.info({ uid: result.uid }, '管理員 Google 登入成功');
+  return result;
+}
+```
+
+### 5. 更新測試頁面
 
 **檔案**: `public/google-auth-test.html`
 
@@ -282,6 +419,8 @@ window.verifyWithBackend = async function() {
 
 ### POST /api/auth/member/signInWithGoogle
 
+會員 Google 第三方登入端點
+
 **Request Body:**
 ```json
 {
@@ -304,3 +443,32 @@ window.verifyWithBackend = async function() {
 **Error Responses:**
 - 400 Bad Request: 無效的 ID Token
 - 401 Unauthorized: 登入已過期或 Google 登入失敗
+
+---
+
+### POST /api/auth/admin/signInWithGoogle
+
+管理員 Google 第三方登入端點
+
+**Request Body:**
+```json
+{
+  "idToken": "eyJhbGciOiJSUzI1NiIsImtpZCI6...",
+  "refreshToken": "AOEOulZ..."
+}
+```
+
+**Response (200 OK):**
+```json
+{
+  "idToken": "eyJhbGciOiJSUzI1NiIsImtpZCI6...",
+  "refreshToken": "AOEOulZ...",
+  "expiresIn": "3600",
+  "uid": "abc123...",
+  "message": "註冊並登入成功"
+}
+```
+
+**Error Responses:**
+- 400 Bad Request: 無效的 ID Token
+- 401 Unauthorized: 登入已過期或管理員 Google 登入失敗

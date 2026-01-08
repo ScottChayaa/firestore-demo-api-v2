@@ -76,10 +76,10 @@ export class AuthService {
   }
 
   /**
-   * 會員登入
-   * 使用 Firebase REST API 取得 ID Token
+   * 會員密碼登入
+   * 使用 Firebase REST API 搭配 email/password 取得 ID Token
    */
-  async signIn(dto: SignInDto) {
+  async signInWithPassword(dto: SignInDto) {
     try {
       const response = await axios.post(
         `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${this.webApiKey}`,
@@ -123,10 +123,10 @@ export class AuthService {
   }
 
   /**
-   * 管理員登入
-   * 使用 Firebase REST API 取得 ID Token
+   * 管理員密碼登入
+   * 使用 Firebase REST API 搭配 email/password 取得 ID Token
    */
-  async adminSignIn(dto: SignInDto) {
+  async adminSignInWithPassword(dto: SignInDto) {
     try {
       const response = await axios.post(
         `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${this.webApiKey}`,
@@ -200,7 +200,7 @@ export class AuthService {
   }
 
   /**
-   * Google 第三方登入
+   * 會員 Google 第三方登入
    * 1. 驗證 Google idToken
    * 2. 檢查會員是否存在，不存在則建立
    * 3. 設定 Custom Claims（member 角色）
@@ -291,6 +291,97 @@ export class AuthService {
       }
 
       throw new UnauthorizedException('Google 登入失敗');
+    }
+  }
+
+  /**
+   * 管理員 Google 第三方登入
+   * 1. 驗證 Google idToken
+   * 2. 檢查管理員是否存在，不存在則建立
+   * 3. 設定 Custom Claims（admin 角色）
+   * 4. 刷新 token 並返回
+   */
+  async adminSignInWithGoogle(dto: GoogleSignInDto) {
+    try {
+      // 1. 驗證 idToken
+      const decodedToken = await this.firebaseApp
+        .auth()
+        .verifyIdToken(dto.idToken);
+
+      const uid = decodedToken.uid;
+      const email = decodedToken.email;
+      const name = decodedToken.name || email?.split('@')[0];
+
+      // 2. 檢查管理員是否已存在於 Firestore
+      const adminDoc = await this.firestore
+        .collection('admins')
+        .doc(uid)
+        .get();
+
+      if (!adminDoc.exists) {
+        // 第一次使用 Google 登入，建立管理員記錄
+        await this.firestore
+          .collection('admins')
+          .doc(uid)
+          .set({
+            email,
+            name,
+            createdAt: admin.firestore.FieldValue.serverTimestamp(),
+            updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+          });
+
+        this.logger.info({ uid, email }, '新管理員透過 Google 登入註冊');
+      }
+
+      // 3. 確保 Custom Claims 已設定（避免重複登入時遺失）
+      if (!decodedToken.admin) {
+        await this.firebaseApp.auth().setCustomUserClaims(uid, {
+          admin: true,
+        });
+
+        this.logger.info({ uid }, '設定管理員 Custom Claims');
+      }
+
+      // 4. 當設定了新的 custom claims 時，需要刷新 token
+      // 使用 refreshToken 通過 Firebase REST API 獲取包含新 claims 的 idToken
+      if (!decodedToken.admin || !adminDoc.exists) {
+        // 需要刷新 token（新管理員或缺少 custom claims）
+        const tokenResponse = await axios.post(
+          `https://securetoken.googleapis.com/v1/token?key=${this.webApiKey}`,
+          {
+            grant_type: 'refresh_token',
+            refresh_token: dto.refreshToken,
+          },
+        );
+
+        return {
+          idToken: tokenResponse.data.id_token,
+          refreshToken: tokenResponse.data.refresh_token,
+          expiresIn: tokenResponse.data.expires_in,
+          uid,
+          message: adminDoc.exists ? '登入成功' : '註冊並登入成功',
+        };
+      }
+
+      // 已存在的管理員且已有 custom claims，直接返回原 token
+      return {
+        idToken: dto.idToken,
+        refreshToken: dto.refreshToken,
+        expiresIn: '3600',
+        uid,
+        message: '登入成功',
+      };
+    } catch (error) {
+      this.logger.error({ error: error.message }, '管理員 Google 登入失敗');
+
+      if (error.code === 'auth/id-token-expired') {
+        throw new UnauthorizedException('登入已過期，請重新登入');
+      }
+      if (error.code === 'auth/argument-error') {
+        throw new BadRequestException('無效的 ID Token');
+      }
+
+      throw new UnauthorizedException('管理員 Google 登入失敗');
     }
   }
 }

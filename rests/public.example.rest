@@ -37,7 +37,7 @@ Content-Type: {{contentType}}
 }
 
 ### ============================================
-### 會員登入（Email/Password 直接取得含會員角色的 ID Token）
+### 會員密碼登入（Email/Password 直接取得含會員角色的 ID Token）
 ### ============================================
 POST {{baseUrl}}/api/auth/member/signInWithPassword
 Content-Type: {{contentType}}

@@ -3,7 +3,7 @@
 @adminToken = Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6ImEzOGVhNmEwNDA4YjBjYzVkYTE4OWRmYzg4ODgyZDBmMWI3ZmJmMGUiLCJ0eXAiOiJKV1QifQ.eyJuYW1lIjoi57O757Wx566h55CG5ZOhIiwiYWRtaW4iOnRydWUsImlzcyI6Imh0dHBzOi8vc2VjdXJldG9rZW4uZ29vZ2xlLmNvbS9saWFuZy1kZXYiLCJhdWQiOiJsaWFuZy1kZXYiLCJhdXRoX3RpbWUiOjE3Njc2ODQxMjksInVzZXJfaWQiOiJxSWw5T0laNzZJaEpuYk1vdDJtT1RSVTM1OTMyIiwic3ViIjoicUlsOU9JWjc2SWhKbmJNb3QybU9UUlUzNTkzMiIsImlhdCI6MTc2NzY4NDEyOSwiZXhwIjoxNzY3Njg3NzI5LCJlbWFpbCI6ImFkbWluQGV4YW1wbGUuY29tIiwiZW1haWxfdmVyaWZpZWQiOmZhbHNlLCJmaXJlYmFzZSI6eyJpZGVudGl0aWVzIjp7ImVtYWlsIjpbImFkbWluQGV4YW1wbGUuY29tIl19LCJzaWduX2luX3Byb3ZpZGVyIjoicGFzc3dvcmQifX0.d5cMzmXBY7eQKocMjxKkAvP2MiwvC4wAWiNLvn6jPnLU1HOHGC1WOwI8LCT0KAIzEYmcrbBo1-z4syhV5QfvfymmR8Yge6as48c0riiH9HypgXERbwq_sH7DHN0u1IkfU8AZgN26Ev9qFuLFFix4eTQe3haXZdxEHLp8r-kp4qSukb_isuT4lzye6OOVVXDSx54zcN3hFUaJRBsKG6sXDiML6lyJeiYJFkAQHC8cmf9mq-6mK6WWUayUoHy9DYAU87Cx4ti4piMnJaZLNXKmVALUcrGQAKgywtdB4BOS5H9fI2Hq5GWvLw2LQ8vNNEvP8FgBLf4kTvKlgHXN2hlzAg
 
 ### ============================================
-### 管理員登入（Email/Password 直接取得含管理員角色的 ID Token）
+### 管理員密碼登入（Email/Password 直接取得含管理員角色的 ID Token）
 ### ============================================
 POST {{baseUrl}}/api/auth/admin/signInWithPassword
 Content-Type: {{contentType}}
@@ -12,6 +12,18 @@ Content-Type: {{contentType}}
   "email": "admin@example.com",
   "password": "qwer1234"
 }
+
+### ============================================
+### 管理員 Google 第三方登入
+### ============================================
+POST {{baseUrl}}/api/auth/admin/signInWithGoogle
+Content-Type: {{contentType}}
+
+{
+  "idToken": "從 Google 登入獲得的 idToken",
+  "refreshToken": "從 Google 登入獲得的 refreshToken"
+}
+
 ### ============================================
 ### 會員管理 - 查詢會員列表
 ### ============================================

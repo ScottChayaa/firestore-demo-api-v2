@@ -28,28 +28,28 @@ export class AuthController {
   }
 
   /**
-   * 會員登入
+   * 會員密碼登入
    * POST /api/auth/member/signInWithPassword
    */
   @Public()
   @Post('member/signInWithPassword')
   async memberSignIn(@Body() signInDto: SignInDto) {
-    this.logger.info({ email: signInDto.email }, '會員登入請求');
-    const result = await this.authService.signIn(signInDto);
-    this.logger.info({ uid: result.uid }, '會員登入成功');
+    this.logger.info({ email: signInDto.email }, '會員密碼登入請求');
+    const result = await this.authService.signInWithPassword(signInDto);
+    this.logger.info({ uid: result.uid }, '會員密碼登入成功');
     return result;
   }
 
   /**
-   * 管理員登入
+   * 管理員密碼登入
    * POST /api/auth/admin/signInWithPassword
    */
   @Public()
   @Post('admin/signInWithPassword')
   async adminSignIn(@Body() signInDto: SignInDto) {
-    this.logger.info({ email: signInDto.email }, '管理員登入請求');
-    const result = await this.authService.adminSignIn(signInDto);
-    this.logger.info({ uid: result.uid }, '管理員登入成功');
+    this.logger.info({ email: signInDto.email }, '管理員密碼登入請求');
+    const result = await this.authService.adminSignInWithPassword(signInDto);
+    this.logger.info({ uid: result.uid }, '管理員密碼登入成功');
     return result;
   }
 
@@ -67,15 +67,28 @@ export class AuthController {
   }
 
   /**
-   * Google 第三方登入
+   * 會員 Google 第三方登入
    * POST /api/auth/member/signInWithGoogle
    */
   @Public()
   @Post('member/signInWithGoogle')
   async memberSignInWithGoogle(@Body() googleSignInDto: GoogleSignInDto) {
-    this.logger.info('Google 第三方登入請求');
+    this.logger.info('會員 Google 第三方登入請求');
     const result = await this.authService.signInWithGoogle(googleSignInDto);
-    this.logger.info({ uid: result.uid }, 'Google 登入成功');
+    this.logger.info({ uid: result.uid }, '會員 Google 登入成功');
+    return result;
+  }
+
+  /**
+   * 管理員 Google 第三方登入
+   * POST /api/auth/admin/signInWithGoogle
+   */
+  @Public()
+  @Post('admin/signInWithGoogle')
+  async adminSignInWithGoogle(@Body() googleSignInDto: GoogleSignInDto) {
+    this.logger.info('管理員 Google 第三方登入請求');
+    const result = await this.authService.adminSignInWithGoogle(googleSignInDto);
+    this.logger.info({ uid: result.uid }, '管理員 Google 登入成功');
     return result;
   }
 }
