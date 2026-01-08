@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google 第三方登入測試</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 600px;
+            width: 100%;
+            padding: 40px;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .config-section {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .config-section h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            color: #555;
+            margin-bottom: 5px;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 13px;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        button {
+            flex: 1;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-google {
+            background: white;
+            color: #333;
+            border: 2px solid #ddd;
+        }
+
+        .btn-google:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-verify {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-verify:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-verify:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .status {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 13px;
+            line-height: 1.6;
+            display: none;
+        }
+
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        .token-display {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            word-break: break-all;
+            max-height: 200px;
+            overflow-y: auto;
+            display: none;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .google-icon {
+            width: 18px;
+            height: 18px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔐 Google 第三方登入測試</h1>
+        <p class="subtitle">Firebase Authentication with Google Provider</p>
+
+        <div class="config-section">
+            <h3>⚙️ Firebase 配置</h3>
+            <div class="form-group">
+                <label for="apiKey">API Key</label>
+                <input type="text" id="apiKey" placeholder="從 Firebase Console 取得">
+            </div>
+            <div class="form-group">
+                <label for="projectId">Project ID</label>
+                <input type="text" id="projectId" placeholder="your-project-id">
+            </div>
+            <div class="form-group">
+                <label for="apiEndpoint">API Endpoint</label>
+                <input type="text" id="apiEndpoint" value="http://localhost:8080/api" placeholder="http://localhost:8080/api">
+            </div>
+        </div>
+
+        <div class="button-group">
+            <button class="btn-google" onclick="signInWithGoogle()">
+                <svg class="google-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
+                    <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+                    <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+                    <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+                    <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+                </svg>
+                使用 Google 登入
+            </button>
+        </div>
+
+        <div class="button-group">
+            <button class="btn-verify" id="verifyBtn" onclick="verifyWithBackend()" disabled>
+                驗證並建立會員
+            </button>
+        </div>
+
+        <div id="status" class="status"></div>
+        <div id="tokenDisplay" class="token-display"></div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getAuth, signInWithPopup, GoogleAuthProvider } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+
+        let auth;
+        let currentIdToken = null;
+        let currentRefreshToken = null;
+
+        // 初始化 Firebase
+        window.initFirebase = function() {
+            const apiKey = document.getElementById('apiKey').value;
+            const projectId = document.getElementById('projectId').value;
+
+            if (!apiKey || !projectId) {
+                showStatus('請填寫 Firebase API Key 和 Project ID', 'error');
+                return null;
+            }
+
+            const firebaseConfig = {
+                apiKey: apiKey,
+                authDomain: `${projectId}.firebaseapp.com`,
+                projectId: projectId,
+            };
+
+            const app = initializeApp(firebaseConfig);
+            auth = getAuth(app);
+            return auth;
+        };
+
+        // Google 登入
+        window.signInWithGoogle = async function() {
+            try {
+                showStatus('正在初始化 Firebase...', 'info');
+
+                if (!auth) {
+                    auth = initFirebase();
+                    if (!auth) return;
+                }
+
+                const provider = new GoogleAuthProvider();
+                provider.addScope('email');
+                provider.addScope('profile');
+
+                showStatus('正在開啟 Google 登入視窗...', 'info');
+                const result = await signInWithPopup(auth, provider);
+
+                const user = result.user;
+                const idToken = await user.getIdToken();
+                const refreshToken = user.refreshToken;
+
+                currentIdToken = idToken;
+                currentRefreshToken = refreshToken;
+
+                // 啟用驗證按鈕
+                document.getElementById('verifyBtn').disabled = false;
+
+                showStatus(`✅ Google 登入成功！\n\n使用者：${user.displayName}\nEmail：${user.email}\nUID：${user.uid}`, 'success');
+
+                // 顯示 ID Token（前 100 字）
+                document.getElementById('tokenDisplay').style.display = 'block';
+                document.getElementById('tokenDisplay').textContent = `ID Token:\n${idToken.substring(0, 100)}...\n\nRefresh Token:\n${refreshToken.substring(0, 100)}...\n\n完整 Token 已儲存，可點擊「驗證並建立會員」按鈕送至後端驗證`;
+
+            } catch (error) {
+                console.error('Google 登入錯誤:', error);
+                showStatus(`❌ 登入失敗：${error.message}`, 'error');
+            }
+        };
+
+        // 驗證 Token 並建立會員
+        window.verifyWithBackend = async function() {
+            if (!currentIdToken || !currentRefreshToken) {
+                showStatus('請先使用 Google 登入', 'error');
+                return;
+            }
+
+            const apiEndpoint = document.getElementById('apiEndpoint').value;
+            if (!apiEndpoint) {
+                showStatus('請填寫 API Endpoint', 'error');
+                return;
+            }
+
+            try {
+                const verifyBtn = document.getElementById('verifyBtn');
+                verifyBtn.innerHTML = '<span class="loading"></span> 驗證中...';
+                verifyBtn.disabled = true;
+
+                const response = await fetch(`${apiEndpoint}/auth/member/signInWithGoogle`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        idToken: currentIdToken,
+                        refreshToken: currentRefreshToken
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showStatus(`✅ 後端驗證成功！\n\n${JSON.stringify(data, null, 2)}`, 'success');
+                    document.getElementById('tokenDisplay').textContent = `後端返回的 Token:\n${data.idToken}\n\n現在可以使用此 Token 呼叫其他需要認證的 API`;
+                } else {
+                    showStatus(`❌ 後端驗證失敗：${data.message || JSON.stringify(data)}`, 'error');
+                }
+
+                verifyBtn.innerHTML = '驗證並建立會員';
+                verifyBtn.disabled = false;
+
+            } catch (error) {
+                console.error('驗證錯誤:', error);
+                showStatus(`❌ 驗證失敗：${error.message}`, 'error');
+
+                const verifyBtn = document.getElementById('verifyBtn');
+                verifyBtn.innerHTML = '驗證並建立會員';
+                verifyBtn.disabled = false;
+            }
+        };
+
+        function showStatus(message, type) {
+            const status = document.getElementById('status');
+            status.textContent = message;
+            status.className = `status ${type}`;
+            status.style.display = 'block';
+        }
+
+        // 頁面載入時嘗試從 localStorage 讀取配置
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedApiKey = localStorage.getItem('firebase_api_key');
+            const savedProjectId = localStorage.getItem('firebase_project_id');
+            const savedApiEndpoint = localStorage.getItem('api_endpoint');
+
+            if (savedApiKey) document.getElementById('apiKey').value = savedApiKey;
+            if (savedProjectId) document.getElementById('projectId').value = savedProjectId;
+            if (savedApiEndpoint) document.getElementById('apiEndpoint').value = savedApiEndpoint;
+
+            // 監聽輸入變化並儲存
+            document.getElementById('apiKey').addEventListener('change', (e) => {
+                localStorage.setItem('firebase_api_key', e.target.value);
+            });
+            document.getElementById('projectId').addEventListener('change', (e) => {
+                localStorage.setItem('firebase_project_id', e.target.value);
+            });
+            document.getElementById('apiEndpoint').addEventListener('change', (e) => {
+                localStorage.setItem('api_endpoint', e.target.value);
+            });
+        });
+    </script>
+</body>
+</html>

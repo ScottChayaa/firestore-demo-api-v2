@@ -11,6 +11,7 @@ import axios from 'axios';
 import { RegisterDto } from './dto/register.dto';
 import { SignInDto } from './dto/sign-in.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
+import { GoogleSignInDto } from './dto/google-sign-in.dto';
 import { PinoLogger, InjectPinoLogger } from 'nestjs-pino';
 
 @Injectable()
@@ -195,6 +196,101 @@ export class AuthService {
         };
       }
       throw new BadRequestException('發送密碼重設郵件失敗');
+    }
+  }
+
+  /**
+   * Google 第三方登入
+   * 1. 驗證 Google idToken
+   * 2. 檢查會員是否存在，不存在則建立
+   * 3. 設定 Custom Claims（member 角色）
+   * 4. 刷新 token 並返回
+   */
+  async signInWithGoogle(dto: GoogleSignInDto) {
+    try {
+      // 1. 驗證 idToken
+      const decodedToken = await this.firebaseApp
+        .auth()
+        .verifyIdToken(dto.idToken);
+
+      const uid = decodedToken.uid;
+      const email = decodedToken.email;
+      const name = decodedToken.name || email?.split('@')[0];
+
+      // 2. 檢查會員是否已存在於 Firestore
+      const memberDoc = await this.firestore
+        .collection('members')
+        .doc(uid)
+        .get();
+
+      if (!memberDoc.exists) {
+        // 第一次使用 Google 登入，建立會員記錄
+        await this.firestore
+          .collection('members')
+          .doc(uid)
+          .set({
+            email,
+            name,
+            phone: null,
+            isActive: true,
+            deletedAt: null,
+            deletedBy: null,
+            createdAt: admin.firestore.FieldValue.serverTimestamp(),
+            updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+          });
+
+        this.logger.info({ uid, email }, '新會員透過 Google 登入註冊');
+      }
+
+      // 3. 確保 Custom Claims 已設定（避免重複登入時遺失）
+      if (!decodedToken.member) {
+        await this.firebaseApp.auth().setCustomUserClaims(uid, {
+          member: true,
+        });
+
+        this.logger.info({ uid }, '設定會員 Custom Claims');
+      }
+
+      // 4. 當設定了新的 custom claims 時，需要刷新 token
+      // 使用 refreshToken 通過 Firebase REST API 獲取包含新 claims 的 idToken
+      if (!decodedToken.member || !memberDoc.exists) {
+        // 需要刷新 token（新會員或缺少 custom claims）
+        const tokenResponse = await axios.post(
+          `https://securetoken.googleapis.com/v1/token?key=${this.webApiKey}`,
+          {
+            grant_type: 'refresh_token',
+            refresh_token: dto.refreshToken,
+          },
+        );
+
+        return {
+          idToken: tokenResponse.data.id_token,
+          refreshToken: tokenResponse.data.refresh_token,
+          expiresIn: tokenResponse.data.expires_in,
+          uid,
+          message: memberDoc.exists ? '登入成功' : '註冊並登入成功',
+        };
+      }
+
+      // 已存在的會員且已有 custom claims，直接返回原 token
+      return {
+        idToken: dto.idToken,
+        refreshToken: dto.refreshToken,
+        expiresIn: '3600',
+        uid,
+        message: '登入成功',
+      };
+    } catch (error) {
+      this.logger.error({ error: error.message }, 'Google 登入失敗');
+
+      if (error.code === 'auth/id-token-expired') {
+        throw new UnauthorizedException('登入已過期，請重新登入');
+      }
+      if (error.code === 'auth/argument-error') {
+        throw new BadRequestException('無效的 ID Token');
+      }
+
+      throw new UnauthorizedException('Google 登入失敗');
     }
   }
 }

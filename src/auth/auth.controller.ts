@@ -3,6 +3,7 @@ import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { SignInDto } from './dto/sign-in.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
+import { GoogleSignInDto } from './dto/google-sign-in.dto';
 import { Public } from '../common/decorators/public.decorator';
 import { PinoLogger } from 'nestjs-pino';
 
@@ -62,6 +63,19 @@ export class AuthController {
     this.logger.info({ email: forgotPasswordDto.email }, '忘記密碼請求');
     const result = await this.authService.forgotPassword(forgotPasswordDto);
     this.logger.info({ email: forgotPasswordDto.email }, '密碼重設郵件已發送');
+    return result;
+  }
+
+  /**
+   * Google 第三方登入
+   * POST /api/auth/member/signInWithGoogle
+   */
+  @Public()
+  @Post('member/signInWithGoogle')
+  async memberSignInWithGoogle(@Body() googleSignInDto: GoogleSignInDto) {
+    this.logger.info('Google 第三方登入請求');
+    const result = await this.authService.signInWithGoogle(googleSignInDto);
+    this.logger.info({ uid: result.uid }, 'Google 登入成功');
     return result;
   }
 }
