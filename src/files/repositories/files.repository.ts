@@ -173,6 +173,7 @@ export class FilesRepository {
       | 'deletedAt'
       | 'deletedBy'
       | 'filePath'
+      | 'uploadedBy'
     >,
     uploadedBy: string,
   ): Promise<File> {

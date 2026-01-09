@@ -1,4 +1,5 @@
-import { IsOptional, IsString, IsEnum, IsNumber, Type } from 'class-validator';
+import { IsOptional, IsString, IsEnum, IsNumber } from 'class-validator';
+import { Type } from 'class-transformer';
 import { PaginationDto } from '../../common/dto/pagination.dto';
 import { ToBoolean } from '../../common/decorators/to-boolean.decorator';
 
