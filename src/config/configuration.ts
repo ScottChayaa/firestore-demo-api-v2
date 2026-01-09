@@ -87,6 +87,17 @@ export default () => {
     storage: {
       bucketName: config.GCS_BUCKET_NAME || `${config.FIREBASE_PROJECT_ID}.appspot.com`,
       signedUrlExpiresMinutes: parseInt(config.GCS_SIGNED_URL_EXPIRES_MINUTES, 10) || 15,
+
+      // 檔案大小限制策略（JSON 格式，支援針對不同分類設定不同限制）
+      fileSizeLimits: config.GCS_FILE_SIZE_LIMITS
+        ? JSON.parse(config.GCS_FILE_SIZE_LIMITS)
+        : null,
+
+      // 預設和全域限制
+      defaultMaxFileSizeMB: parseInt(config.GCS_DEFAULT_MAX_FILE_SIZE_MB, 10) || 100,
+      globalMaxFileSizeMB: parseInt(config.GCS_GLOBAL_MAX_FILE_SIZE_MB, 10) || 1000,
+
+      // 向後相容配置（僅在 fileSizeLimits 未配置時使用）
       allowedFileTypes: config.GCS_ALLOWED_FILE_TYPES?.split(',') || [
         'image/jpeg',
         'image/png',
