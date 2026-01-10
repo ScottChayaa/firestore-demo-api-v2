@@ -27,7 +27,9 @@ git commit -m "docs: 更新 API 文件"
 - ✅ 每次完成任務後，必須主動幫用戶建立繁體中文 git commit
 - ❌ Commit message 中**不要**包含 "Generated with Claude Code" 或 "Co-Authored-By: Claude" 等 AI 生成標記
 - ✅ 使用簡潔清晰的中文 commit message
-- ✅ 條列一些重要的更新內容(簡潔)
+- ✅ 條列重要的更新內容，使用簡潔的條列式說明
+- ❌ **不要**在 commit message 中包含技術細節（如具體程式碼、函式名稱、參數等）
+- ✅ 專注於「做了什麼改變」而非「如何實作」
 
 
 ## 專案結構
