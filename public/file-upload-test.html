@@ -454,7 +454,7 @@
         showStatus('步驟 1/4：生成上傳 URL...', 'info');
         updateProgress(10, '步驟 1/4：生成上傳 URL...');
 
-        const signedUrlResponse = await fetch(`${API_BASE}/storage/generate-upload-url`, {
+        const signedUrlResponse = await fetch(`${API_BASE}/admin/storage/generate-upload-url`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

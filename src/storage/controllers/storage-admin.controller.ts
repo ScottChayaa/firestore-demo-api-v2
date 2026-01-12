@@ -15,18 +15,18 @@ import { GenerateUploadUrlDto } from '../dto/generate-upload-url.dto';
 import { DeleteFileDto } from '../dto/delete-file.dto';
 import { PinoLogger, InjectPinoLogger } from 'nestjs-pino';
 
-@Controller('storage')
+@Controller('admin/storage')
 @UseGuards(FirebaseAuthGuard, RolesGuard)
 @Roles('admin')
-export class StorageController {
+export class StorageAdminController {
   constructor(
     private readonly storageService: StorageService,
-    @InjectPinoLogger(StorageController.name)
+    @InjectPinoLogger(StorageAdminController.name)
     private readonly logger: PinoLogger,
   ) {}
 
   /**
-   * POST /api/storage/generate-upload-url
+   * POST /api/admin/storage/generate-upload-url
    * 生成上傳用的 Signed URL
    */
   @Post('generate-upload-url')
@@ -42,7 +42,7 @@ export class StorageController {
   }
 
   /**
-   * DELETE /api/storage/files
+   * DELETE /api/admin/storage/files
    * 刪除檔案
    */
   @Delete('files')

@@ -335,7 +335,7 @@
 
         // 步驟 1: 取得 Signed URL
         showStatus('正在生成上傳 URL...', 'info');
-        const signedUrlResponse = await fetch(`${API_BASE}/storage/generate-upload-url`, {
+        const signedUrlResponse = await fetch(`${API_BASE}/admin/storage/generate-upload-url`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -438,7 +438,7 @@
         elements.deleteBtn.disabled = true;
         showStatus('正在刪除圖片...', 'info');
 
-        const response = await fetch(`${API_BASE}/storage/files`, {
+        const response = await fetch(`${API_BASE}/admin/storage/files`, {
           method: 'DELETE',
           headers: {
             'Content-Type': 'application/json',
