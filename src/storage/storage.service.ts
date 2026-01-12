@@ -200,10 +200,11 @@ export class StorageService {
   private sanitizeFileName(fileName: string): string {
     // 移除路徑遍歷字元和危險字元
     let sanitized = fileName
-      .replace(/\.\./g, '')                    // 路徑遍歷
+      .replace(/\.\./g, '')                   // 路徑遍歷
       .replace(/[/\\:*?"<>|]/g, '-')          // Windows/Unix 禁用字元
       .replace(/[\x00-\x1F\x7F]/g, '')        // 控制字元
-      .trim();                                 // 移除前後空白
+      .replace(/\s+/g, '_')                   // 將空格替換為底線（提高可讀性）
+      .trim();                                // 移除前後空白
 
     // 避免檔名只有點或破折號
     if (/^[.-]+$/.test(sanitized)) {
