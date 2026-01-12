@@ -195,17 +195,23 @@ export class StorageService {
   }
 
   /**
-   * 清理檔案名稱（移除特殊字元）
+   * 清理檔案名稱（移除危險字元，保留中文等 Unicode 字元）
    */
   private sanitizeFileName(fileName: string): string {
-    // 移除路徑遍歷字元
-    let sanitized = fileName.replace(/\.\./g, '');
+    // 移除路徑遍歷字元和危險字元
+    let sanitized = fileName
+      .replace(/\.\./g, '')                    // 路徑遍歷
+      .replace(/[/\\:*?"<>|]/g, '-')          // Windows/Unix 禁用字元
+      .replace(/[\x00-\x1F\x7F]/g, '')        // 控制字元
+      .trim();                                 // 移除前後空白
 
-    // 移除特殊字元，只保留字母、數字、底線、連字號、點
-    sanitized = sanitized.replace(/[^a-zA-Z0-9_.-]/g, '-');
+    // 避免檔名只有點或破折號
+    if (/^[.-]+$/.test(sanitized)) {
+      sanitized = 'file' + sanitized;
+    }
 
-    // 限制長度（保留副檔名）
-    const maxLength = 100;
+    // 限制長度（保留副檔名）- 注意中文字元佔較多 bytes
+    const maxLength = 200;  // 增加長度限制以容納中文
     if (sanitized.length > maxLength) {
       const ext = sanitized.substring(sanitized.lastIndexOf('.'));
       sanitized = sanitized.substring(0, maxLength - ext.length) + ext;

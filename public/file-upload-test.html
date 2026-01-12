@@ -495,7 +495,7 @@
             'Authorization': `Bearer ${token}`,
           },
           body: JSON.stringify({
-            fileName: file.name.replace(/[^a-zA-Z0-9_.-]/g, '-'),
+            fileName: file.name,  // 直接使用原始檔名，讓後端處理清理
             originalFileName: file.name,
             tempFilePath: tempFilePath,
             cdnUrl: tempCdnUrl,
