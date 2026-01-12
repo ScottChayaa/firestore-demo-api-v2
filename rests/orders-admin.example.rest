@@ -1,0 +1,110 @@
+@baseUrl = http://localhost:8080
+@contentType = application/json
+@adminToken = Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6ImEzOGVhNmEwNDA4YjBjYzVkYTE4OWRmYzg4ODgyZDBmMWI3ZmJmMGUiLCJ0eXAiOiJKV1QifQ.eyJuYW1lIjoi57O757Wx566h55CG5ZOhIiwiYWRtaW4iOnRydWUsImlzcyI6Imh0dHBzOi8vc2VjdXJldG9rZW4uZ29vZ2xlLmNvbS9saWFuZy1kZXYiLCJhdWQiOiJsaWFuZy1kZXYiLCJhdXRoX3RpbWUiOjE3Njc2ODQxMjksInVzZXJfaWQiOiJxSWw5T0laNzZJaEpuYk1vdDJtT1RSVTM1OTMyIiwic3ViIjoicUlsOU9JWjc2SWhKbmJNb3QybU9UUlUzNTkzMiIsImlhdCI6MTc2NzY4NDEyOSwiZXhwIjoxNzY3Njg3NzI5LCJlbWFpbCI6ImFkbWluQGV4YW1wbGUuY29tIiwiZW1haWxfdmVyaWZpZWQiOmZhbHNlLCJmaXJlYmFzZSI6eyJpZGVudGl0aWVzIjp7ImVtYWlsIjpbImFkbWluQGV4YW1wbGUuY29tIl19LCJzaWduX2luX3Byb3ZpZGVyIjoicGFzc3dvcmQifX0.d5cMzmXBY7eQKocMjxKkAvP2MiwvC4wAWiNLvn6jPnLU1HOHGC1WOwI8LCT0KAIzEYmcrbBo1-z4syhV5QfvfymmR8Yge6as48c0riiH9HypgXERbwq_sH7DHN0u1IkfU8AZgN26Ev9qFuLFFix4eTQe3haXZdxEHLp8r-kp4qSukb_isuT4lzye6OOVVXDSx54zcN3hFUaJRBsKG6sXDiML6lyJeiYJFkAQHC8cmf9mq-6mK6WWUayUoHy9DYAU87Cx4ti4piMnJaZLNXKmVALUcrGQAKgywtdB4BOS5H9fI2Hq5GWvLw2LQ8vNNEvP8FgBLf4kTvKlgHXN2hlzAg
+
+### ============================================
+### 訂單管理 - 查詢所有訂單（基本）
+### ============================================
+GET {{baseUrl}}/api/admin/orders
+Content-Type: {{contentType}}
+Authorization: {{adminToken}}
+
+### ============================================
+### 訂單管理 - 查詢所有訂單（分頁）
+### ============================================
+GET {{baseUrl}}/api/admin/orders?limit=20
+Content-Type: {{contentType}}
+Authorization: {{adminToken}}
+###
+GET {{baseUrl}}/api/admin/orders?limit=20&cursor=xxx
+Content-Type: {{contentType}}
+Authorization: {{adminToken}}
+
+### ============================================
+### 訂單管理 - 查詢所有訂單（依會員篩選）
+### ============================================
+GET {{baseUrl}}/api/admin/orders?memberId=test_member_123
+Content-Type: {{contentType}}
+Authorization: {{adminToken}}
+
+### ============================================
+### 訂單管理 - 查詢所有訂單（依狀態篩選）
+### ============================================
+GET {{baseUrl}}/api/admin/orders?status=pending
+Content-Type: {{contentType}}
+Authorization: {{adminToken}}
+###
+GET {{baseUrl}}/api/admin/orders?status=completed
+Content-Type: {{contentType}}
+Authorization: {{adminToken}}
+
+### ============================================
+### 訂單管理 - 查詢所有訂單（日期範圍）
+### ============================================
+GET {{baseUrl}}/api/admin/orders?startDate=2026-01-01&endDate=2026-12-31
+Content-Type: {{contentType}}
+Authorization: {{adminToken}}
+
+### ============================================
+### 訂單管理 - 查詢所有訂單（金額範圍）
+### ============================================
+GET {{baseUrl}}/api/admin/orders?minAmount=100&maxAmount=5000
+Content-Type: {{contentType}}
+Authorization: {{adminToken}}
+
+### ============================================
+### 訂單管理 - 查詢所有訂單（複合條件）
+### ============================================
+GET {{baseUrl}}/api/admin/orders?memberId=test_member_123&status=pending&minAmount=100&maxAmount=5000&orderBy=totalAmount&order=asc
+Content-Type: {{contentType}}
+Authorization: {{adminToken}}
+
+### ============================================
+### 訂單管理 - 查詢單一訂單
+### ============================================
+GET {{baseUrl}}/api/admin/orders/wdzT8mrRtsqzYMibqO5e
+Content-Type: {{contentType}}
+Authorization: {{adminToken}}
+
+### ============================================
+### 訂單管理 - 建立訂單
+### ============================================
+POST {{baseUrl}}/api/admin/orders
+Content-Type: {{contentType}}
+Authorization: {{adminToken}}
+
+{
+  "memberId": "sA0F9DmqlNaUWZ2MkGe0TceoD7G2",
+  "items": [
+    {
+      "productId": "product111111",
+      "productName": "測試商品",
+      "quantity": 2,
+      "price": 100
+    },
+    {
+      "productId": "product222222",
+      "productName": "測試商品2",
+      "quantity": 1,
+      "price": 222
+    }
+  ]
+}
+
+### ============================================
+### 訂單管理 - 更新訂單
+### ============================================
+PUT {{baseUrl}}/api/admin/orders/ORDER_ID_HERE
+Content-Type: {{contentType}}
+Authorization: {{adminToken}}
+
+{
+  "status": "completed"
+}
+
+### ============================================
+### 訂單管理 - 刪除訂單
+### ============================================
+DELETE {{baseUrl}}/api/admin/orders/bHjjjzRktfORAicGbhWI
+Content-Type: {{contentType}}
+Authorization: {{adminToken}}

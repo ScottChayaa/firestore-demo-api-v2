@@ -1,0 +1,42 @@
+@baseUrl = http://localhost:8080
+@contentType = application/json
+
+### ============================================
+### 商品列表（支援分頁和篩選）
+### ============================================
+GET {{baseUrl}}/api/products?limit=3
+Content-Type: {{contentType}}
+### 排序asc
+GET {{baseUrl}}/api/products?order=asc
+### 排序desc
+GET {{baseUrl}}/api/products?order=desc
+Content-Type: {{contentType}}
+### 篩選: 商品分類, 排序: 時間desc
+GET {{baseUrl}}/api/products?category=electronics&orderBy=createdAt&order=desc
+### 篩選: 商品分類, 排序: 時間asc
+GET {{baseUrl}}/api/products?category=electronics&orderBy=createdAt&order=asc
+Content-Type: {{contentType}}
+### 篩選: 價格範圍, 排序: 時間desc
+GET {{baseUrl}}/api/products?minPrice=10&maxPrice=9999&orderBy=price&order=desc
+Content-Type: {{contentType}}
+### 篩選: 價格範圍, 排序: 時間asc
+GET {{baseUrl}}/api/products?minPrice=10&maxPrice=9999&orderBy=price&order=asc
+Content-Type: {{contentType}}
+### 篩選: 價格範圍, 排序: 價格asc
+GET {{baseUrl}}/api/products?minPrice=10&maxPrice=9999&orderBy=price&order=asc
+Content-Type: {{contentType}}
+### 商品列表: 測試
+GET {{baseUrl}}/api/products?minPrice=11&maxPrice=9999&orderBy=price&order=asc
+Content-Type: {{contentType}}
+
+### ============================================
+### 商品分類列表
+### ============================================
+GET {{baseUrl}}/api/products/categories
+Content-Type: {{contentType}}
+
+### ============================================
+### 取得單一商品詳情
+### ============================================
+GET {{baseUrl}}/api/products/pzjNPjsFrmsagdO750lG
+Content-Type: {{contentType}}

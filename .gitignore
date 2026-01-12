@@ -57,10 +57,7 @@ missing-*-indexes.json
 
 # Rest API
 *.rest
-!private.example.rest
-!public.example.rest
-!admin.example.rest
-!member.example.rest
+!*.example.rest
 
 # Claude Code
 .claude/

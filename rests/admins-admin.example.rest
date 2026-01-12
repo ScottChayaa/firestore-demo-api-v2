@@ -1,0 +1,99 @@
+@baseUrl = http://localhost:8080
+@contentType = application/json
+@adminToken = Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6ImEzOGVhNmEwNDA4YjBjYzVkYTE4OWRmYzg4ODgyZDBmMWI3ZmJmMGUiLCJ0eXAiOiJKV1QifQ.eyJuYW1lIjoi57O757Wx566h55CG5ZOhIiwiYWRtaW4iOnRydWUsImlzcyI6Imh0dHBzOi8vc2VjdXJldG9rZW4uZ29vZ2xlLmNvbS9saWFuZy1kZXYiLCJhdWQiOiJsaWFuZy1kZXYiLCJhdXRoX3RpbWUiOjE3Njc2ODQxMjksInVzZXJfaWQiOiJxSWw5T0laNzZJaEpuYk1vdDJtT1RSVTM1OTMyIiwic3ViIjoicUlsOU9JWjc2SWhKbmJNb3QybU9UUlUzNTkzMiIsImlhdCI6MTc2NzY4NDEyOSwiZXhwIjoxNzY3Njg3NzI5LCJlbWFpbCI6ImFkbWluQGV4YW1wbGUuY29tIiwiZW1haWxfdmVyaWZpZWQiOmZhbHNlLCJmaXJlYmFzZSI6eyJpZGVudGl0aWVzIjp7ImVtYWlsIjpbImFkbWluQGV4YW1wbGUuY29tIl19LCJzaWduX2luX3Byb3ZpZGVyIjoicGFzc3dvcmQifX0.d5cMzmXBY7eQKocMjxKkAvP2MiwvC4wAWiNLvn6jPnLU1HOHGC1WOwI8LCT0KAIzEYmcrbBo1-z4syhV5QfvfymmR8Yge6as48c0riiH9HypgXERbwq_sH7DHN0u1IkfU8AZgN26Ev9qFuLFFix4eTQe3haXZdxEHLp8r-kp4qSukb_isuT4lzye6OOVVXDSx54zcN3hFUaJRBsKG6sXDiML6lyJeiYJFkAQHC8cmf9mq-6mK6WWUayUoHy9DYAU87Cx4ti4piMnJaZLNXKmVALUcrGQAKgywtdB4BOS5H9fI2Hq5GWvLw2LQ8vNNEvP8FgBLf4kTvKlgHXN2hlzAg
+
+### ============================================
+### 管理員管理 - 查詢管理員列表）
+### ============================================
+GET {{baseUrl}}/api/admin/admins
+Content-Type: {{contentType}}
+Authorization: {{adminToken}}
+###
+GET {{baseUrl}}/api/admin/admins?limit=1&startDate=2025-12-15&endDate=2025-12-14
+Content-Type: {{contentType}}
+Authorization: {{adminToken}}
+
+### ============================================
+### 管理員管理 - 建立管理員（含 Auth 帳號）
+### ============================================
+POST {{baseUrl}}/api/admin/admins
+Content-Type: {{contentType}}
+Authorization: {{adminToken}}
+
+{
+  "email": "newadmin@example.com",
+  "password": "qwer1234",
+  "name": "新管理員"
+}
+
+### ============================================
+### 管理員管理 - 賦予管理員角色（現有帳號）
+### ============================================
+POST {{baseUrl}}/api/admin/admins/assign-role
+Content-Type: {{contentType}}
+Authorization: {{adminToken}}
+
+{
+  "uid": "oUUspiRAxdfHJjQGeTxKpyO5lMG2",
+  "name": "會員也是管理員"
+}
+
+### ============================================
+### 管理員管理 - 查詢單一管理員
+### ============================================
+GET {{baseUrl}}/api/admin/admins/oUUspiRAxdfHJjQGeTxKpyO5lMG2
+Content-Type: {{contentType}}
+Authorization: {{adminToken}}
+
+### ============================================
+### 管理員管理 - 更新管理員資料
+### ============================================
+PUT {{baseUrl}}/api/admin/admins/oUUspiRAxdfHJjQGeTxKpyO5lMG2
+Content-Type: {{contentType}}
+Authorization: {{adminToken}}
+
+{
+  "name": "黃金管理員2"
+}
+
+### ============================================
+### 管理員管理 - 刪除管理員（軟刪除）
+### ============================================
+DELETE {{baseUrl}}/api/admin/admins/oUUspiRAxdfHJjQGeTxKpyO5lMG2
+Content-Type: {{contentType}}
+Authorization: {{adminToken}}
+
+### ============================================
+### 管理員管理 - 切換管理員啟用/停用狀態
+### ============================================
+PATCH {{baseUrl}}/api/admin/admins/oUUspiRAxdfHJjQGeTxKpyO5lMG2/toggle-status
+Content-Type: {{contentType}}
+Authorization: {{adminToken}}
+
+### ============================================
+### 管理員管理 - 恢復已軟刪除的管理員
+### ============================================
+POST {{baseUrl}}/api/admin/admins/oUUspiRAxdfHJjQGeTxKpyO5lMG2/restore
+Content-Type: {{contentType}}
+Authorization: {{adminToken}}
+
+### ============================================
+### 管理員管理 - 查詢管理員列表（包含已刪除）
+### ============================================
+GET {{baseUrl}}/api/admin/admins?includeDeleted=true
+Content-Type: {{contentType}}
+Authorization: {{adminToken}}
+
+### ============================================
+### 管理員管理 - 查詢管理員列表（僅啟用）
+### ============================================
+GET {{baseUrl}}/api/admin/admins?isActive=true
+Content-Type: {{contentType}}
+Authorization: {{adminToken}}
+
+### ============================================
+### 管理員管理 - 查詢管理員列表（僅停用）
+### ============================================
+GET {{baseUrl}}/api/admin/admins?isActive=false
+Content-Type: {{contentType}}
+Authorization: {{adminToken}}

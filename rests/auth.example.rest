@@ -1,0 +1,59 @@
+@baseUrl = http://localhost:8080
+@contentType = application/json
+
+### ============================================
+### 註冊
+### ============================================
+POST {{baseUrl}}/api/auth/register
+Content-Type: {{contentType}}
+
+{
+  "email": "apple@example.com",
+  "password": "qwer1234",
+  "name": "蘋果",
+  "phone": "0912345678"
+}
+
+### ============================================
+### 會員密碼登入（Email/Password 直接取得含會員角色的 ID Token）
+### ============================================
+POST {{baseUrl}}/api/auth/member/signInWithPassword
+Content-Type: {{contentType}}
+
+{
+  "email": "apple@example.com",
+  "password": "qwer1234"
+}
+
+### ============================================
+### 管理員密碼登入（Email/Password 直接取得含管理員角色的 ID Token）
+### ============================================
+POST {{baseUrl}}/api/auth/admin/signInWithPassword
+Content-Type: {{contentType}}
+
+{
+  "email": "admin@example.com",
+  "password": "qwer1234"
+}
+
+### ============================================
+### 管理員 Google 第三方登入
+### ============================================
+POST {{baseUrl}}/api/auth/admin/signInWithGoogle
+Content-Type: {{contentType}}
+
+{
+  "idToken": "從 Google 登入獲得的 idToken",
+  "refreshToken": "從 Google 登入獲得的 refreshToken"
+}
+
+### ============================================
+### 會員忘記密碼（使用 firebase 內建發送郵件功能）
+###  - 有頻率限制（2 分鐘內）
+### ============================================
+POST {{baseUrl}}/api/auth/forgot-password
+Content-Type: {{contentType}}
+
+{
+  "email": "apple@example.com"
+}
