@@ -150,6 +150,7 @@ export class AdminsRepository {
     // 分頁（使用 mapToEntity 轉換 Firestore Timestamp 為 Date）
     return PaginationHelper.paginate<Admin>(
       query,
+      'admins',
       {
         cursor: queryDto.cursor,
         limit: queryDto.limit,

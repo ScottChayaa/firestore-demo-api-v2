@@ -100,6 +100,7 @@ export class FilesRepository {
     // 執行分頁查詢
     return PaginationHelper.paginate<File>(
       firestoreQuery,
+      'files',
       {
         cursor: queryDto.cursor,
         limit: queryDto.limit,

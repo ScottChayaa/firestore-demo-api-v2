@@ -7,6 +7,7 @@ import * as admin from 'firebase-admin';
 export class PaginationHelper {
   static async paginate<T>(
     query: admin.firestore.Query,
+    collectionName: string,
     options: PaginationQuery,
     mapper?: (doc: admin.firestore.DocumentSnapshot) => T,
   ): Promise<PaginationResult<T>> {
@@ -17,7 +18,10 @@ export class PaginationHelper {
 
     // 如果有 cursor，從該位置開始查詢
     if (cursor) {
-      const cursorDoc = await query.firestore.doc(cursor).get();
+      const cursorDoc = await query.firestore
+        .collection(collectionName)
+        .doc(cursor)
+        .get();
       if (cursorDoc.exists) {
         paginatedQuery = paginatedQuery.startAfter(cursorDoc);
       }
@@ -44,7 +48,7 @@ export class PaginationHelper {
       pagination: {
         limit,
         hasMore,
-        nextCursor: hasMore && docs.length > 0 ? docs[docs.length - 1].ref.path : undefined,
+        nextCursor: hasMore && docs.length > 0 ? docs[docs.length - 1].id : undefined,
         count: docs.length,
       },
     };

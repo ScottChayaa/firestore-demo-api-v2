@@ -117,6 +117,7 @@ export class MembersRepository {
     // 分頁（使用 mapToEntity 转换 Firestore Timestamp 为 Date）
     return PaginationHelper.paginate<Member>(
       query,
+      'members',
       {
         cursor: queryDto.cursor,
         limit: queryDto.limit,

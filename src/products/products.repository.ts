@@ -122,6 +122,7 @@ export class ProductsRepository {
     // 執行分頁查詢（使用 mapToEntity 转换 Firestore Timestamp 为 Date）
     return PaginationHelper.paginate<Product>(
       firestoreQuery,
+      'products',
       {
         cursor: queryDto.cursor,
         limit: queryDto.limit,

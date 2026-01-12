@@ -116,6 +116,7 @@ export class OrdersRepository {
     // 分頁
     return PaginationHelper.paginate<Order>(
       query,
+      'orders',
       {
         cursor: queryDto.cursor,
         limit: queryDto.limit,
