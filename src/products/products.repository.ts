@@ -1,4 +1,4 @@
-import { Injectable, Inject, NotFoundException } from '@nestjs/common';
+import { Injectable, Inject, NotFoundException, BadRequestException } from '@nestjs/common';
 import * as admin from 'firebase-admin';
 import { Product } from './entities/product.entity';
 import { ProductQueryDto } from './dto/product-query.dto';
@@ -46,41 +46,78 @@ export class ProductsRepository {
           adminQuery.isActive,
         );
       }
-
-      // 庫存篩選（僅管理端）
-      if (adminQuery.minStock !== undefined) {
-        firestoreQuery = firestoreQuery.where(
-          'stock',
-          '>=',
-          adminQuery.minStock,
-        );
-      }
-      if (adminQuery.maxStock !== undefined) {
-        firestoreQuery = firestoreQuery.where(
-          'stock',
-          '<=',
-          adminQuery.maxStock,
-        );
-      }
     }
 
-    // 分類篩選（前台和後台共用）
+    // 分類篩選（前台和後台共用，等值查詢不衝突）
     if (queryDto.category) {
       firestoreQuery = firestoreQuery.where('category', '==', queryDto.category);
     }
 
-    // 價格篩選（前台和後台共用）
-    if (queryDto.minPrice !== undefined) {
-      firestoreQuery = firestoreQuery.where('price', '>=', queryDto.minPrice);
-    }
-    if (queryDto.maxPrice !== undefined) {
-      firestoreQuery = firestoreQuery.where('price', '<=', queryDto.maxPrice);
+    // 檢查範圍查詢互斥（Firestore 限制：只能對單一欄位進行範圍查詢）
+    const hasNameSearch = !!queryDto.name;
+    const hasPriceRange = !!(queryDto.minPrice !== undefined || queryDto.maxPrice !== undefined);
+    const hasStockRange = isAdminQuery && !!(
+      (queryDto as AdminProductQueryDto).minStock !== undefined ||
+      (queryDto as AdminProductQueryDto).maxStock !== undefined
+    );
+
+    const rangeQueryCount = [hasNameSearch, hasPriceRange, hasStockRange].filter(Boolean).length;
+    if (rangeQueryCount > 1) {
+      const activeQueries = [];
+      if (hasNameSearch) activeQueries.push('name');
+      if (hasPriceRange) activeQueries.push('minPrice/maxPrice');
+      if (hasStockRange) activeQueries.push('minStock/maxStock');
+
+      throw new BadRequestException(
+        `範圍查詢功能無法同時使用（Firestore 限制：範圍查詢只能用於單一欄位）。` +
+        `目前提供的範圍查詢：${activeQueries.join('、')}。` +
+        `請僅選擇其中一個使用。`
+      );
     }
 
-    // 排序欄位（預設 createdAt）
-    const orderBy = queryDto.orderBy || 'createdAt';
-    const order = queryDto.order || 'desc';
-    firestoreQuery = firestoreQuery.orderBy(orderBy, order);
+    // 名稱搜尋（前台和後台共用）
+    // 注意：Firestore 的搜尋功能有限，這裡只做前綴搜尋
+    // 更好的方案是使用 Algolia 或 Elasticsearch
+    if (hasNameSearch) {
+      firestoreQuery = firestoreQuery
+        .where('name', '>=', queryDto.name)
+        .where('name', '<=', queryDto.name + '\uf8ff');
+
+      // 使用搜尋時，第一個 orderBy 必須是 name（Firestore 限制）
+      firestoreQuery = firestoreQuery.orderBy('name', 'asc');
+    } else if (hasPriceRange) {
+      // 價格篩選（前台和後台共用）
+      if (queryDto.minPrice !== undefined) {
+        firestoreQuery = firestoreQuery.where('price', '>=', queryDto.minPrice);
+      }
+      if (queryDto.maxPrice !== undefined) {
+        firestoreQuery = firestoreQuery.where('price', '<=', queryDto.maxPrice);
+      }
+
+      // 排序
+      const orderBy = queryDto.orderBy || 'createdAt';
+      const order = queryDto.order || 'desc';
+      firestoreQuery = firestoreQuery.orderBy(orderBy, order);
+    } else if (hasStockRange) {
+      // 庫存篩選（僅管理端）
+      const adminQuery = queryDto as AdminProductQueryDto;
+      if (adminQuery.minStock !== undefined) {
+        firestoreQuery = firestoreQuery.where('stock', '>=', adminQuery.minStock);
+      }
+      if (adminQuery.maxStock !== undefined) {
+        firestoreQuery = firestoreQuery.where('stock', '<=', adminQuery.maxStock);
+      }
+
+      // 排序
+      const orderBy = queryDto.orderBy || 'createdAt';
+      const order = queryDto.order || 'desc';
+      firestoreQuery = firestoreQuery.orderBy(orderBy, order);
+    } else {
+      // 沒有範圍查詢時的排序
+      const orderBy = queryDto.orderBy || 'createdAt';
+      const order = queryDto.order || 'desc';
+      firestoreQuery = firestoreQuery.orderBy(orderBy, order);
+    }
 
     // 執行分頁查詢（使用 mapToEntity 转换 Firestore Timestamp 为 Date）
     return PaginationHelper.paginate<Product>(

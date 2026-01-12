@@ -1,4 +1,4 @@
-import { IsOptional, IsEnum, IsBoolean, IsISO8601 } from 'class-validator';
+import { IsOptional, IsEnum, IsBoolean, IsISO8601, IsString } from 'class-validator';
 import { PaginationDto } from '../../common/dto/pagination.dto';
 import { ToBoolean } from '../../common/decorators/to-boolean.decorator';
 
@@ -54,4 +54,12 @@ export class AdminQueryDto extends PaginationDto {
   @IsOptional()
   @IsISO8601({}, { message: 'endDate 必須是有效的 ISO 8601 日期格式' })
   endDate?: string;
+
+  /**
+   * 按名稱搜尋（前綴搜尋）
+   * 注意：使用 name 搜尋時，無法同時使用 startDate 和 endDate（Firestore 限制）
+   */
+  @IsOptional()
+  @IsString({ message: '名稱搜尋必須是字串' })
+  name?: string;
 }

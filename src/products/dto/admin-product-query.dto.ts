@@ -52,4 +52,12 @@ export class AdminProductQueryDto extends PaginationDto {
   @IsNumber({}, { message: '最高庫存必須是數字' })
   @Type(() => Number)
   maxStock?: number;
+
+  /**
+   * 按名稱搜尋（前綴搜尋）
+   * 注意：使用 name 搜尋時，無法同時使用價格/庫存範圍篩選（Firestore 限制）
+   */
+  @IsOptional()
+  @IsString({ message: '名稱搜尋必須是字串' })
+  name?: string;
 }

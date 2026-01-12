@@ -20,4 +20,12 @@ export class ProductQueryDto extends PaginationDto {
   @IsOptional()
   @IsEnum(['price', 'createdAt'], { message: '排序欄位只能是 price 或 createdAt' })
   orderBy?: 'price' | 'createdAt';
+
+  /**
+   * 按名稱搜尋（前綴搜尋）
+   * 注意：使用 name 搜尋時，無法同時使用 minPrice 和 maxPrice（Firestore 限制）
+   */
+  @IsOptional()
+  @IsString({ message: '名稱搜尋必須是字串' })
+  name?: string;
 }

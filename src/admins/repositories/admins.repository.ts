@@ -1,4 +1,4 @@
-import { Injectable, Inject, NotFoundException } from '@nestjs/common';
+import { Injectable, Inject, NotFoundException, BadRequestException } from '@nestjs/common';
 import * as admin from 'firebase-admin';
 import { Admin } from '../entities/admin.entity';
 import { AdminQueryDto } from '../dto/admin-query.dto';
@@ -99,25 +99,53 @@ export class AdminsRepository {
       query = query.where('isActive', '==', queryDto.isActive);
     }
 
-    // 日期範圍篩選
-    if (queryDto.startDate) {
-      const startTimestamp = admin.firestore.Timestamp.fromDate(
-        new Date(queryDto.startDate),
+    // 檢查範圍查詢互斥（Firestore 限制：只能對單一欄位進行範圍查詢）
+    const hasNameSearch = !!queryDto.name;
+    const hasDateRange = !!(queryDto.startDate || queryDto.endDate);
+
+    if (hasNameSearch && hasDateRange) {
+      throw new BadRequestException(
+        '名稱搜尋與日期範圍篩選無法同時使用（Firestore 限制：範圍查詢只能用於單一欄位）。' +
+        '請選擇使用 name 或 startDate/endDate 其中之一。'
       );
-      query = query.where('createdAt', '>=', startTimestamp);
     }
 
-    if (queryDto.endDate) {
-      const endTimestamp = admin.firestore.Timestamp.fromDate(
-        new Date(queryDto.endDate),
-      );
-      query = query.where('createdAt', '<=', endTimestamp);
-    }
+    // 名稱搜尋（前綴搜尋）
+    // 注意：Firestore 的搜尋功能有限，這裡只做前綴搜尋
+    // 更好的方案是使用 Algolia 或 Elasticsearch
+    if (queryDto.name) {
+      query = query
+        .where('name', '>=', queryDto.name)
+        .where('name', '<=', queryDto.name + '\uf8ff');
 
-    // 排序
-    const orderBy = queryDto.orderBy || 'createdAt';
-    const order = queryDto.order || 'desc';
-    query = query.orderBy(orderBy, order);
+      // 使用搜尋時，第一個 orderBy 必須是 name（Firestore 限制）
+      query = query.orderBy('name', 'asc');
+    } else if (hasDateRange) {
+      // 日期範圍篩選
+      if (queryDto.startDate) {
+        const startTimestamp = admin.firestore.Timestamp.fromDate(
+          new Date(queryDto.startDate),
+        );
+        query = query.where('createdAt', '>=', startTimestamp);
+      }
+
+      if (queryDto.endDate) {
+        const endTimestamp = admin.firestore.Timestamp.fromDate(
+          new Date(queryDto.endDate),
+        );
+        query = query.where('createdAt', '<=', endTimestamp);
+      }
+
+      // 排序
+      const orderBy = queryDto.orderBy || 'createdAt';
+      const order = queryDto.order || 'desc';
+      query = query.orderBy(orderBy, order);
+    } else {
+      // 沒有範圍查詢時的排序
+      const orderBy = queryDto.orderBy || 'createdAt';
+      const order = queryDto.order || 'desc';
+      query = query.orderBy(orderBy, order);
+    }
 
     // 分頁（使用 mapToEntity 轉換 Firestore Timestamp 為 Date）
     return PaginationHelper.paginate<Admin>(
