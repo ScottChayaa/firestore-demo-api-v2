@@ -37,6 +37,17 @@ Content-Type: {{contentType}}
 }
 
 ### ============================================
+### 會員 Google 第三方登入
+### ============================================
+POST {{baseUrl}}/api/auth/member/signInWithGoogle
+Content-Type: {{contentType}}
+
+{
+  "idToken": "從 Google 登入獲得的 idToken",
+  "refreshToken": "從 Google 登入獲得的 refreshToken"
+}
+
+### ============================================
 ### 管理員 Google 第三方登入
 ### ============================================
 POST {{baseUrl}}/api/auth/admin/signInWithGoogle

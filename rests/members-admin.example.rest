@@ -1,6 +1,6 @@
 @baseUrl = http://localhost:8080
 @contentType = application/json
-@adminToken = Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6ImEzOGVhNmEwNDA4YjBjYzVkYTE4OWRmYzg4ODgyZDBmMWI3ZmJmMGUiLCJ0eXAiOiJKV1QifQ.eyJuYW1lIjoi57O757Wx566h55CG5ZOhIiwiYWRtaW4iOnRydWUsImlzcyI6Imh0dHBzOi8vc2VjdXJldG9rZW4uZ29vZ2xlLmNvbS9saWFuZy1kZXYiLCJhdWQiOiJsaWFuZy1kZXYiLCJhdXRoX3RpbWUiOjE3Njc2ODQxMjksInVzZXJfaWQiOiJxSWw5T0laNzZJaEpuYk1vdDJtT1RSVTM1OTMyIiwic3ViIjoicUlsOU9JWjc2SWhKbmJNb3QybU9UUlUzNTkzMiIsImlhdCI6MTc2NzY4NDEyOSwiZXhwIjoxNzY3Njg3NzI5LCJlbWFpbCI6ImFkbWluQGV4YW1wbGUuY29tIiwiZW1haWxfdmVyaWZpZWQiOmZhbHNlLCJmaXJlYmFzZSI6eyJpZGVudGl0aWVzIjp7ImVtYWlsIjpbImFkbWluQGV4YW1wbGUuY29tIl19LCJzaWduX2luX3Byb3ZpZGVyIjoicGFzc3dvcmQifX0.d5cMzmXBY7eQKocMjxKkAvP2MiwvC4wAWiNLvn6jPnLU1HOHGC1WOwI8LCT0KAIzEYmcrbBo1-z4syhV5QfvfymmR8Yge6as48c0riiH9HypgXERbwq_sH7DHN0u1IkfU8AZgN26Ev9qFuLFFix4eTQe3haXZdxEHLp8r-kp4qSukb_isuT4lzye6OOVVXDSx54zcN3hFUaJRBsKG6sXDiML6lyJeiYJFkAQHC8cmf9mq-6mK6WWUayUoHy9DYAU87Cx4ti4piMnJaZLNXKmVALUcrGQAKgywtdB4BOS5H9fI2Hq5GWvLw2LQ8vNNEvP8FgBLf4kTvKlgHXN2hlzAg
+@adminToken = Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6ImQ4Mjg5MmZhMzJlY2QxM2E0ZTBhZWZlNjI4ZGQ5YWFlM2FiYThlMWUiLCJ0eXAiOiJKV1QifQ.eyJuYW1lIjoi57O757Wx566h55CG5ZOhIiwiYWRtaW4iOnRydWUsImlzcyI6Imh0dHBzOi8vc2VjdXJldG9rZW4uZ29vZ2xlLmNvbS9saWFuZy1kZXYiLCJhdWQiOiJsaWFuZy1kZXYiLCJhdXRoX3RpbWUiOjE3NjgyMTA0ODMsInVzZXJfaWQiOiJxSWw5T0laNzZJaEpuYk1vdDJtT1RSVTM1OTMyIiwic3ViIjoicUlsOU9JWjc2SWhKbmJNb3QybU9UUlUzNTkzMiIsImlhdCI6MTc2ODIxMDQ4MywiZXhwIjoxNzY4MjE0MDgzLCJlbWFpbCI6ImFkbWluQGV4YW1wbGUuY29tIiwiZW1haWxfdmVyaWZpZWQiOmZhbHNlLCJmaXJlYmFzZSI6eyJpZGVudGl0aWVzIjp7ImVtYWlsIjpbImFkbWluQGV4YW1wbGUuY29tIl19LCJzaWduX2luX3Byb3ZpZGVyIjoicGFzc3dvcmQifX0.l0LSyvOTIYZGc-8ZqmLiFBf0ZbkrYOo_fC0DUyfoojM1UjiFvbKSldvK71XVNJpbUFdI3jVoRvqk8X1Y0y_DhhYwqauRmQrNCn_QGqqY_Tx3DvjZHxbtZv2Sv50WGzZ2s3Klayo7mPZWI1bUtVsj_jV-FYAnzRQV84noUi3rShNDYXyqXUNHC1lrf9MOnTa0cjYB1LHbQ5arJ2BM6DxwcOWs3VpEbNlBtXlqW4wdE40iT8y98futaFQnvQjsdF5-9R9KSznXYkIjR4BymqF3IkoU-lJF2MCOrRGs8Gpf_ZNV_Wc4Are-YnFXXSWn13xfvTYxm2p32UJ05aC7Ruc_Ag
 
 ### ============================================
 ### 會員管理 - 查詢會員列表
@@ -78,7 +78,7 @@ Authorization: {{adminToken}}
 }
 
 ### ============================================
-### 產生會員重設密碼連結
+### 會員管理 - 產生重設密碼連結
 ### ============================================
 POST {{baseUrl}}/api/admin/members/NJCCoWaBVnh3odrVuQfvTh6gS4g1/generate-password-reset-link
 Content-Type: {{contentType}}
