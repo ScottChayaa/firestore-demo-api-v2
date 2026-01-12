@@ -64,7 +64,10 @@ import { readFileSync } from 'fs';
 
         // 設置 database ID（如果不是 default）
         if (databaseId && databaseId !== '(default)') {
-          db.settings({ databaseId });
+          db.settings({ 
+            databaseId,
+            ignoreUndefinedProperties: true,  // 全域忽略 undefined (create 資料時忽略 undefined 參數)
+          });
           console.log(`✅ Firestore connected to database: ${databaseId}`);
         } else {
           console.log('✅ Firestore connected to (default) database');
