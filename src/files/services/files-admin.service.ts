@@ -189,4 +189,29 @@ export class FilesAdminService {
 
     return restoredFile;
   }
+
+  /**
+   * 更新縮圖資訊
+   * 由 webhook 呼叫
+   */
+  async updateThumbnails(
+    fileId: string,
+    thumbnails: any,
+    status: 'completed' | 'failed',
+    error?: string,
+  ): Promise<void> {
+    const updateData: any = {
+      thumbnails,
+      thumbnailStatus: status,
+      thumbnailGeneratedAt: new Date(),
+      updatedAt: new Date(),
+    };
+
+    if (error) {
+      updateData.thumbnailError = error;
+    }
+
+    await this.filesRepo.update(fileId, updateData);
+    this.logger.info({ fileId, status }, 'Thumbnails updated');
+  }
 }
