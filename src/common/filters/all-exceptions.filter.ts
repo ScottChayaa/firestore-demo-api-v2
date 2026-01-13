@@ -28,9 +28,9 @@ export class AllExceptionsFilter implements ExceptionFilter {
       if (typeof exceptionResponse === 'string') {
         message = exceptionResponse;
       } else if (typeof exceptionResponse === 'object') {
-        message = (exceptionResponse as any).message || exceptionResponse;
-        // 🆕 保留 errors 欄位（用於 validation 錯誤）
-        errors = (exceptionResponse as any).errors;
+        let exResponse: any = exceptionResponse as any;
+        message = exResponse.message || exceptionResponse;
+        errors = exResponse.errors; // 保留 errors 欄位（用於 validation 錯誤）
       }
     } else if (exception instanceof Error) {
       message = exception.message;
@@ -43,26 +43,28 @@ export class AllExceptionsFilter implements ExceptionFilter {
 
     // 記錄錯誤
     if (errors) {
-      // 🆕 ValidationError 詳細記錄
+      // ValidationError 詳細記錄
       this.logger.warn(
         {
-          type: 'ValidationError',
-          method: request.method,
-          url: request.url,
+          type: (exception as Error).name,
           errors,
-          query: request.query,
-          body: request.body,
         },
         'Validation failed',
       );
     } else {
       // 一般錯誤記錄
-      this.logger.error(
-        {
-          stack: exception instanceof Error ? exception.stack?.split('\n') : undefined,
-        },
-        'Exception occurred',
-      );
+      if (exception instanceof Error) {
+        this.logger.error(
+          {
+            type: exception.name,
+            stack: exception.stack?.split('\n')
+          },
+          'Exception occurred'
+        );
+      }
+      else {
+        this.logger.error('Exception unknown');
+      }
     }
 
     // 🆕 回傳時包含 errors（如果有的話）

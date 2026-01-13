@@ -1,4 +1,4 @@
-import { BadRequestException, ValidationError } from '@nestjs/common';
+import { UnprocessableEntityException, BadRequestException, ValidationError } from '@nestjs/common';
 
 /**
  * 自訂 ValidationPipe Exception Factory
@@ -11,8 +11,8 @@ export function validationExceptionFactory(errors: ValidationError[]) {
     constraints: error.constraints,
   }));
 
-  return new BadRequestException({
-    statusCode: 400,
+  return new UnprocessableEntityException({
+    statusCode: 422,
     message: '請求參數驗證失敗',
     errors: formattedErrors,
   });
