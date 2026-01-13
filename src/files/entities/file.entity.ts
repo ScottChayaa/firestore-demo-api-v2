@@ -1,3 +1,26 @@
+// 縮圖資訊
+export interface ThumbnailInfo {
+  url: string; // CDN URL
+  filePath: string; // GCS 路徑
+  width: number;
+  height: number;
+  fileSize: number;
+  format: 'jpeg' | 'png' | 'webp';
+}
+
+export interface Thumbnails {
+  small?: ThumbnailInfo;
+  medium?: ThumbnailInfo;
+  large?: ThumbnailInfo;
+  custom?: ThumbnailInfo;
+}
+
+export type ThumbnailStatus =
+  | 'pending'
+  | 'processing'
+  | 'completed'
+  | 'failed';
+
 export interface File {
   id: string; // Firestore 文件 ID
 
@@ -18,6 +41,12 @@ export interface File {
 
   // 狀態
   status: 'temp' | 'uploaded'; // 暫存 | 已上傳
+
+  // 縮圖資訊（圖片檔案專用）
+  thumbnails?: Thumbnails;
+  thumbnailStatus?: ThumbnailStatus;
+  thumbnailError?: string;
+  thumbnailGeneratedAt?: Date;
 
   // 時間戳
   createdAt: Date;
