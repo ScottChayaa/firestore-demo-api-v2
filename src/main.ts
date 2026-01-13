@@ -5,7 +5,6 @@ import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 import { ThrottlerExceptionFilter } from './common/filters/throttler-exception.filter';
-import { ValidationExceptionFilter } from './common/filters/validation-exception.filter';
 import { validationExceptionFactory } from './common/factories/validation-exception.factory';
 import { Logger } from 'nestjs-pino';
 import helmet from 'helmet';
@@ -52,9 +51,8 @@ async function bootstrap() {
   // 註冊全域 Exception Filter
   // 注意：更具體的 Filter 應該先註冊
   app.useGlobalFilters(
-    app.get(ValidationExceptionFilter), // ValidationException 處理（含 logger）
     new ThrottlerExceptionFilter(),
-    new AllExceptionsFilter(),
+    new AllExceptionsFilter(), // 處理所有異常（包含 validation 錯誤）
   );
 
   const port = configService.get<number>('port') || 8080;

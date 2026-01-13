@@ -19,6 +19,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
 
     let status = HttpStatus.INTERNAL_SERVER_ERROR;
     let message: string | object = 'Internal server error';
+    let errors: any = undefined;
 
     if (exception instanceof HttpException) {
       status = exception.getStatus();
@@ -28,6 +29,8 @@ export class AllExceptionsFilter implements ExceptionFilter {
         message = exceptionResponse;
       } else if (typeof exceptionResponse === 'object') {
         message = (exceptionResponse as any).message || exceptionResponse;
+        // 🆕 保留 errors 欄位（用於 validation 錯誤）
+        errors = (exceptionResponse as any).errors;
       }
     } else if (exception instanceof Error) {
       message = exception.message;
@@ -37,18 +40,41 @@ export class AllExceptionsFilter implements ExceptionFilter {
         status = HttpStatus.UNAUTHORIZED;
       }
     }
-    
-    // 記錄錯誤
-    this.logger.error(
-      {
-        stack: exception instanceof Error ? exception.stack.split('\n') : undefined,
-      },
-      'Exception occurred',
-    );
 
-    response.status(status).json({
+    // 記錄錯誤
+    if (errors) {
+      // 🆕 ValidationError 詳細記錄
+      this.logger.warn(
+        {
+          type: 'ValidationError',
+          method: request.method,
+          url: request.url,
+          errors,
+          query: request.query,
+          body: request.body,
+        },
+        'Validation failed',
+      );
+    } else {
+      // 一般錯誤記錄
+      this.logger.error(
+        {
+          stack: exception instanceof Error ? exception.stack?.split('\n') : undefined,
+        },
+        'Exception occurred',
+      );
+    }
+
+    // 🆕 回傳時包含 errors（如果有的話）
+    const responseBody: any = {
       statusCode: status,
       message,
-    });
+    };
+
+    if (errors) {
+      responseBody.errors = errors;
+    }
+
+    response.status(status).json(responseBody);
   }
 }

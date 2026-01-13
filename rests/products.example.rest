@@ -4,7 +4,7 @@
 ### ============================================
 ### 商品列表（支援分頁和篩選）
 ### ============================================
-GET {{baseUrl}}/api/products?limit=3
+GET {{baseUrl}}/api/products?limit=-1
 Content-Type: {{contentType}}
 ### 排序asc
 GET {{baseUrl}}/api/products?order=asc
