@@ -10,6 +10,6 @@ import { StorageModule } from '../storage/storage.module';
   imports: [StorageModule],
   controllers: [FilesController, FilesAdminController],
   providers: [FilesService, FilesAdminService, FilesRepository],
-  exports: [FilesService],
+  exports: [FilesService, FilesAdminService],
 })
 export class FilesModule {}
