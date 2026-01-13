@@ -15,6 +15,7 @@ import { MailModule } from './mail/mail.module';
 import { StorageModule } from './storage/storage.module';
 import { FilesModule } from './files/files.module';
 import { WebhooksModule } from './webhooks/webhooks.module';
+import { ValidationExceptionFilter } from './common/filters/validation-exception.filter';
 import { randomUUID } from 'crypto';
 
 // Cloud Logging severity mapping
@@ -159,6 +160,6 @@ const SEVERITY_LOOKUP = {
     WebhooksModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, ValidationExceptionFilter],
 })
 export class AppModule {}

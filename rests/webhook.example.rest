@@ -1,0 +1,18 @@
+@baseUrl = http://localhost:8080/api
+@webhookSecret = c0dbad5167c94fb92c3387fa572f1e6471ef90fbc07df58ac4e3c13aa7644726
+
+
+### ============================================
+### 接收 Cloud Functions 的縮圖完成通知
+### ============================================
+POST {{baseUrl}}/webhooks/thumbnail-completed
+Content-Type: application/json
+Authorization: Bearer {{webhookSecret}}
+
+{
+  "fileId": "111",
+  "filePath": "222",
+  "thumbnails": {},
+  "status": "123",
+  "error": "completed"
+}

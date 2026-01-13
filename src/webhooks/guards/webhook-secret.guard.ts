@@ -20,7 +20,8 @@ export class WebhookSecretGuard implements CanActivate {
 
     const token = authHeader.substring(7);
     const expectedSecret = this.configService.get<string>('WEBHOOK_SECRET');
-
+console.log(expectedSecret);
+console.log(!expectedSecret);
     if (!expectedSecret) {
       throw new Error('WEBHOOK_SECRET not configured');
     }
