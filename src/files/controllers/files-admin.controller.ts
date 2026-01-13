@@ -15,7 +15,7 @@ import { FilesAdminService } from '../services/files-admin.service';
 import { CreateFileDto } from '../dto/create-file.dto';
 import { UpdateFileDto } from '../dto/update-file.dto';
 import { AdminFileQueryDto } from '../dto/admin-file-query.dto';
-import { FileResponseDto } from '../dto/file-response.dto';
+import { File } from '../entities/file.entity';
 import { FirebaseAuthGuard } from '../../common/guards/firebase-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
@@ -46,7 +46,7 @@ export class FilesAdminController {
   @Get()
   async getFiles(
     @Query() query: AdminFileQueryDto,
-  ): Promise<PaginationResult<FileResponseDto>> {
+  ): Promise<PaginationResult<File>> {
     this.logger.info({ query }, '管理員查詢檔案列表請求');
     const result = await this.filesAdminService.getFiles(query);
     this.logger.info({ count: result.data.length }, '查詢檔案列表成功');
@@ -62,7 +62,7 @@ export class FilesAdminController {
   async createFile(
     @Body() dto: CreateFileDto,
     @CurrentUser() admin: admin.auth.DecodedIdToken,
-  ): Promise<FileResponseDto> {
+  ): Promise<File> {
     this.logger.info(
       {
         fileName: dto.fileName,
@@ -99,7 +99,7 @@ export class FilesAdminController {
   async updateFile(
     @Param('id') id: string,
     @Body() dto: UpdateFileDto,
-  ): Promise<FileResponseDto> {
+  ): Promise<File> {
     this.logger.info({ fileId: id, updateData: dto }, '更新檔案元數據請求');
     const file = await this.filesAdminService.updateFile(id, dto);
     this.logger.info({ fileId: id, fileName: file.fileName }, '更新成功');
