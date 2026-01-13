@@ -84,7 +84,7 @@ export class FilesAdminController {
    * 取得單一檔案詳情（可包含已刪除）
    */
   @Get(':id')
-  async getFileById(@Param('id') id: string): Promise<FileResponseDto> {
+  async getFileById(@Param('id') id: string): Promise<File> {
     this.logger.info({ fileId: id }, '查詢單一檔案請求');
     const file = await this.filesAdminService.getFileById(id);
     this.logger.info({ fileId: id, fileName: file.fileName }, '查詢成功');
