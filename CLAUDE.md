@@ -65,3 +65,9 @@ firestore-demo-api-v2/
 ├── Dockerfile               # Docker 配置
 └── README.md                # 專案說明文件
 ```
+
+
+## 程式設計原則
+
+- 避免過度設計
+- 高可用與重用性
