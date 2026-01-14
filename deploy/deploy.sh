@@ -257,15 +257,15 @@ show_deployment_info() {
   echo ""
 
   # 可選：執行健康檢查
-  read -p "是否執行健康檢查？(Y/n): " HEALTH_CHECK
-  if [[ ! "$HEALTH_CHECK" =~ ^[Nn]$ ]]; then
-    echo -e "${BLUE}執行健康檢查...${NC}"
-    if curl -s -o /dev/null -w "%{http_code}" "$SERVICE_URL/health" | grep -q "200"; then
-      echo -e "${GREEN}✓ 健康檢查通過${NC}"
-    else
-      echo -e "${RED}✗ 健康檢查失敗${NC}"
-    fi
-  fi
+  # read -p "是否執行健康檢查？(Y/n): " HEALTH_CHECK
+  # if [[ ! "$HEALTH_CHECK" =~ ^[Nn]$ ]]; then
+  #   echo -e "${BLUE}執行健康檢查...${NC}"
+  #   if curl -s -o /dev/null -w "%{http_code}" "$SERVICE_URL/health" | grep -q "200"; then
+  #     echo -e "${GREEN}✓ 健康檢查通過${NC}"
+  #   else
+  #     echo -e "${RED}✗ 健康檢查失敗${NC}"
+  #   fi
+  # fi
 }
 
 # ========================================
