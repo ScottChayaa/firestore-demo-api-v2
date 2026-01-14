@@ -35,14 +35,6 @@ export class ProductsAdminService {
    * 建立產品
    */
   async createProduct(dto: CreateProductDto): Promise<Product> {
-    // 驗證價格和庫存
-    if (dto.price < 0) {
-      throw new BadRequestException('價格不能為負數');
-    }
-    if (dto.stock < 0) {
-      throw new BadRequestException('庫存不能為負數');
-    }
-
     let finalImageUrl = dto.imageUrl;
 
     // 如果有圖片且在暫存區，移動到正式區
