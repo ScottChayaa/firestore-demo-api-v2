@@ -77,53 +77,6 @@ export class FilesAdminService {
   }
 
   /**
-   * 確認上傳（將檔案從暫存區移動到正式區）
-   */
-  async confirmUpload(id: string): Promise<File> {
-    // 1. 取得檔案記錄
-    const file = await this.filesRepo.findById(id, { includeDeleted: true });
-
-    // 2. 檢查狀態
-    if (file.deletedAt) {
-      throw new BadRequestException('無法確認已刪除的檔案');
-    }
-
-    if (file.status === 'uploaded') {
-      throw new BadRequestException('檔案已經確認上傳');
-    }
-
-    if (!file.tempFilePath) {
-      throw new BadRequestException('檔案缺少暫存路徑');
-    }
-
-    // 3. 移動檔案到正式區
-    const permanentFilePath =
-      await this.storageService.moveFromTempToPermanent(file.tempFilePath);
-
-    // 4. 生成新的 CDN URL
-    const permanentCdnUrl = this.storageService.getCdnUrl(permanentFilePath);
-
-    // 5. 更新檔案記錄
-    const updatedFile = await this.filesRepo.update(id, {
-      filePath: permanentFilePath,
-      cdnUrl: permanentCdnUrl,
-      status: 'uploaded',
-      tempFilePath: undefined,
-    });
-
-    this.logger.info(
-      {
-        fileId: id,
-        tempPath: file.tempFilePath,
-        permanentPath: permanentFilePath,
-      },
-      '檔案已移動到正式區並確認上傳',
-    );
-
-    return updatedFile;
-  }
-
-  /**
    * 更新檔案元數據
    */
   async updateFile(id: string, dto: UpdateFileDto): Promise<File> {

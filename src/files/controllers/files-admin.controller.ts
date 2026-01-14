@@ -139,23 +139,4 @@ export class FilesAdminController {
       file,
     };
   }
-
-  /**
-   * POST /api/admin/files/:id/confirm-upload
-   * 確認上傳（將檔案從 temp/ 移到 uploads/）
-   */
-  @Post(':id/confirm-upload')
-  @HttpCode(HttpStatus.OK)
-  async confirmUpload(@Param('id') id: string) {
-    this.logger.info({ fileId: id }, '確認檔案上傳請求');
-    const file = await this.filesAdminService.confirmUpload(id);
-    this.logger.info(
-      { fileId: id, fileName: file.fileName, filePath: file.filePath },
-      '確認上傳成功',
-    );
-    return {
-      message: '檔案已確認上傳',
-      file,
-    };
-  }
 }

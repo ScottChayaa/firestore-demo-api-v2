@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>GCS 大檔案上傳測試</title>
+  <title>GCS 檔案上傳測試</title>
   <style>
     * {
       margin: 0;
@@ -26,7 +26,7 @@
       border-radius: 16px;
       box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
       padding: 40px;
-      max-width: 700px;
+      max-width: 600px;
       width: 100%;
     }
 
@@ -56,21 +56,16 @@
     }
 
     input[type="text"],
-    input[type="file"],
-    select,
-    textarea {
+    input[type="file"] {
       width: 100%;
       padding: 12px;
       border: 2px solid #e0e0e0;
       border-radius: 8px;
       font-size: 14px;
       transition: border-color 0.3s;
-      font-family: inherit;
     }
 
-    input[type="text"]:focus,
-    select:focus,
-    textarea:focus {
+    input[type="text"]:focus {
       outline: none;
       border-color: #667eea;
     }
@@ -78,10 +73,6 @@
     input[type="file"] {
       cursor: pointer;
       padding: 10px;
-    }
-
-    select {
-      cursor: pointer;
     }
 
     button {
@@ -107,25 +98,6 @@
       cursor: not-allowed;
     }
 
-    .file-info {
-      background: #f8f9fa;
-      padding: 15px;
-      border-radius: 8px;
-      margin-top: 10px;
-      display: none;
-    }
-
-    .file-info-item {
-      margin: 5px 0;
-      font-size: 13px;
-      color: #555;
-    }
-
-    .file-info-label {
-      font-weight: 600;
-      color: #333;
-    }
-
     .progress-container {
       margin-top: 15px;
       display: none;
@@ -133,11 +105,11 @@
 
     .progress-bar {
       width: 100%;
-      height: 10px;
+      height: 8px;
       background: #e0e0e0;
-      border-radius: 5px;
+      border-radius: 4px;
       overflow: hidden;
-      margin-bottom: 8px;
+      margin-bottom: 5px;
     }
 
     .progress-fill {
@@ -148,9 +120,38 @@
     }
 
     .progress-text {
-      font-size: 13px;
+      font-size: 12px;
       color: #666;
       text-align: center;
+    }
+
+    .preview-container {
+      margin-top: 30px;
+      display: none;
+      background: #f5f5f5;
+      border-radius: 12px;
+      padding: 20px;
+    }
+
+    .cdn-url-container {
+      margin-bottom: 15px;
+    }
+
+    .cdn-url {
+      background: white;
+      padding: 12px;
+      border-radius: 8px;
+      word-break: break-all;
+      font-size: 13px;
+      color: #333;
+      border: 1px solid #ddd;
+      margin-top: 5px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    .cdn-url:hover {
+      background: #f8f8f8;
     }
 
     .status {
@@ -179,61 +180,17 @@
       border: 1px solid #bee5eb;
     }
 
-    .result-container {
-      margin-top: 30px;
-      display: none;
-      background: #f5f5f5;
-      border-radius: 12px;
-      padding: 20px;
-    }
-
-    .result-item {
-      margin-bottom: 15px;
-    }
-
-    .result-item:last-child {
-      margin-bottom: 0;
-    }
-
-    .result-label {
-      font-weight: 600;
-      color: #333;
-      margin-bottom: 5px;
-      font-size: 13px;
-    }
-
-    .result-value {
-      background: white;
-      padding: 10px;
-      border-radius: 6px;
-      word-break: break-all;
-      font-size: 13px;
-      color: #555;
-      border: 1px solid #ddd;
-      font-family: 'Courier New', monospace;
-    }
-
     .hint {
       font-size: 12px;
       color: #888;
       margin-top: 5px;
     }
-
-    .category-limits {
-      font-size: 12px;
-      color: #666;
-      margin-top: 5px;
-      padding: 8px;
-      background: #fff3cd;
-      border-radius: 4px;
-      border: 1px solid #ffeeba;
-    }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>📦 GCS 大檔案上傳測試</h1>
-    <p class="subtitle">支援上傳各種類型的大檔案</p>
+    <h1>📦 GCS 檔案上傳測試</h1>
+    <p class="subtitle">支援上傳各種類型的檔案到暫存區</p>
 
     <!-- Token 輸入區 -->
     <div class="section">
@@ -247,18 +204,16 @@
       <p class="hint">提示：可透過 REST Client 或其他工具取得管理員 token</p>
     </div>
 
-    <!-- 檔案分類選擇 -->
+    <!-- 檔案分類輸入 -->
     <div class="section">
       <div class="section-title">📂 檔案分類</div>
-      <select id="category">
-        <option value="image">圖片 (Image)</option>
-        <option value="document">文件 (Document)</option>
-        <option value="video">影片 (Video)</option>
-        <option value="other">其他 (Other)</option>
-      </select>
-      <div class="category-limits" id="categoryLimits">
-        圖片分類限制：5MB | 支援類型：JPEG, PNG, GIF, WebP
-      </div>
+      <input
+        type="text"
+        id="category"
+        value="files"
+        placeholder="輸入檔案分類（例如：files, documents, images）"
+      >
+      <p class="hint">預設：files | 用於組織檔案結構</p>
     </div>
 
     <!-- 檔案上傳區 -->
@@ -268,30 +223,7 @@
         type="file"
         id="fileInput"
       >
-      <div class="file-info" id="fileInfo">
-        <div class="file-info-item">
-          <span class="file-info-label">檔案名稱：</span>
-          <span id="fileName"></span>
-        </div>
-        <div class="file-info-item">
-          <span class="file-info-label">檔案類型：</span>
-          <span id="fileType"></span>
-        </div>
-        <div class="file-info-item">
-          <span class="file-info-label">檔案大小：</span>
-          <span id="fileSize"></span>
-        </div>
-      </div>
-    </div>
-
-    <!-- 檔案描述（可選） -->
-    <div class="section">
-      <div class="section-title">📝 檔案描述（選填）</div>
-      <textarea
-        id="description"
-        rows="3"
-        placeholder="輸入檔案描述..."
-      ></textarea>
+      <p class="hint">支援所有檔案類型 | 最大 100MB</p>
     </div>
 
     <button id="uploadBtn" disabled>開始上傳</button>
@@ -307,23 +239,11 @@
     <!-- 狀態訊息 -->
     <div class="status" id="status"></div>
 
-    <!-- 結果顯示區 -->
-    <div class="result-container" id="resultContainer">
-      <div class="result-item">
-        <div class="result-label">✅ 檔案 ID</div>
-        <div class="result-value" id="fileId"></div>
-      </div>
-      <div class="result-item">
-        <div class="result-label">🔗 CDN URL（點擊複製）</div>
-        <div class="result-value" id="cdnUrl" style="cursor:pointer;" title="點擊複製"></div>
-      </div>
-      <div class="result-item">
-        <div class="result-label">📁 檔案路徑</div>
-        <div class="result-value" id="filePath"></div>
-      </div>
-      <div class="result-item">
-        <div class="result-label">📊 檔案元數據</div>
-        <div class="result-value" id="metadata"></div>
+    <!-- 預覽區 -->
+    <div class="preview-container" id="previewContainer">
+      <div class="cdn-url-container">
+        <div class="section-title">🔗 CDN URL (Temp)</div>
+        <div class="cdn-url" id="cdnUrl" title="點擊複製"></div>
       </div>
     </div>
   </div>
@@ -332,33 +252,19 @@
     // const API_BASE = 'http://localhost:8080/api';
     const API_BASE = 'https://firestore-demo-api-v2-ykwkhguwca-de.a.run.app/api';
 
-    const CATEGORY_LIMITS = {
-      image: { maxSizeMB: 5, types: 'JPEG, PNG, GIF, WebP' },
-      document: { maxSizeMB: 50, types: 'PDF, DOC, DOCX, TXT' },
-      video: { maxSizeMB: 500, types: 'MP4, WebM, MOV' },
-      other: { maxSizeMB: 100, types: '所有類型' }
-    };
+    let currentCdnUrl = null;
 
     const elements = {
       token: document.getElementById('token'),
       category: document.getElementById('category'),
       fileInput: document.getElementById('fileInput'),
-      description: document.getElementById('description'),
       uploadBtn: document.getElementById('uploadBtn'),
-      fileInfo: document.getElementById('fileInfo'),
-      fileName: document.getElementById('fileName'),
-      fileType: document.getElementById('fileType'),
-      fileSize: document.getElementById('fileSize'),
-      categoryLimits: document.getElementById('categoryLimits'),
       progressContainer: document.getElementById('progressContainer'),
       progressFill: document.getElementById('progressFill'),
       progressText: document.getElementById('progressText'),
       status: document.getElementById('status'),
-      resultContainer: document.getElementById('resultContainer'),
-      fileId: document.getElementById('fileId'),
+      previewContainer: document.getElementById('previewContainer'),
       cdnUrl: document.getElementById('cdnUrl'),
-      filePath: document.getElementById('filePath'),
-      metadata: document.getElementById('metadata'),
     };
 
     // Token 變更時儲存到 localStorage
@@ -373,34 +279,10 @@
       elements.token.value = savedToken;
     }
 
-    // 分類變更時更新限制說明
-    elements.category.addEventListener('change', () => {
-      const category = elements.category.value;
-      const limits = CATEGORY_LIMITS[category];
-      elements.categoryLimits.textContent =
-        `${category.toUpperCase()} 分類限制：${limits.maxSizeMB}MB | 支援類型：${limits.types}`;
-    });
-
     // 檔案選擇變更
     elements.fileInput.addEventListener('change', () => {
-      const file = elements.fileInput.files[0];
-      if (file) {
-        elements.fileName.textContent = file.name;
-        elements.fileType.textContent = file.type || '未知類型';
-        elements.fileSize.textContent = formatFileSize(file.size);
-        elements.fileInfo.style.display = 'block';
-      } else {
-        elements.fileInfo.style.display = 'none';
-      }
       checkUploadReady();
     });
-
-    // 格式化檔案大小
-    function formatFileSize(bytes) {
-      if (bytes < 1024) return bytes + ' B';
-      if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(2) + ' KB';
-      return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
-    }
 
     // 檢查是否可以上傳
     function checkUploadReady() {
@@ -431,29 +313,27 @@
     elements.uploadBtn.addEventListener('click', async () => {
       const token = elements.token.value.trim();
       const file = elements.fileInput.files[0];
-      const category = elements.category.value;
-      const description = elements.description.value.trim();
+      const category = elements.category.value.trim() || 'files';
 
       if (!token || !file) return;
 
-      // 驗證檔案大小
-      const limits = CATEGORY_LIMITS[category];
-      const maxSize = limits.maxSizeMB * 1024 * 1024;
+      // 驗證檔案大小（100MB）
+      const maxSize = 100 * 1024 * 1024;
       if (file.size > maxSize) {
-        showStatus(`檔案大小超過 ${limits.maxSizeMB}MB 限制`, 'error');
+        showStatus('檔案大小超過 100MB 限制', 'error');
         return;
       }
 
       try {
         elements.uploadBtn.disabled = true;
         hideStatus();
-        elements.resultContainer.style.display = 'none';
+        elements.previewContainer.style.display = 'none';
         elements.progressContainer.style.display = 'block';
         updateProgress(0, '準備中...');
 
-        // 步驟 1: 取得 Signed URL
-        showStatus('步驟 1/4：生成上傳 URL...', 'info');
-        updateProgress(10, '步驟 1/4：生成上傳 URL...');
+        // 步驟 1/2: 取得 Signed URL
+        showStatus('步驟 1/2：生成上傳 URL...', 'info');
+        updateProgress(10, '步驟 1/2：生成上傳 URL...');
 
         const signedUrlResponse = await fetch(`${API_BASE}/admin/storage/generate-upload-url`, {
           method: 'POST',
@@ -474,69 +354,22 @@
           throw new Error(error.message || '生成上傳 URL 失敗');
         }
 
-        const { uploadUrl, filePath: tempFilePath, cdnUrl: tempCdnUrl } = await signedUrlResponse.json();
+        const { uploadUrl, cdnUrl } = await signedUrlResponse.json();
+        currentCdnUrl = cdnUrl;
 
-        // 步驟 2: 上傳到 GCS
-        showStatus('步驟 2/4：上傳檔案到 GCS...', 'info');
-        updateProgress(20, '步驟 2/4：上傳檔案到 GCS...');
+        // 步驟 2/2: 上傳到 GCS
+        showStatus('步驟 2/2：上傳檔案到 GCS...', 'info');
+        updateProgress(20, '步驟 2/2：上傳檔案到 GCS...');
 
         await uploadToGCS(uploadUrl, file, (percent) => {
-          const progress = 20 + (percent * 0.5);
-          updateProgress(progress, `步驟 2/4：上傳中 ${Math.round(percent)}%`);
+          const progress = 20 + (percent * 0.8);
+          updateProgress(progress, `步驟 2/2：上傳中 ${Math.round(percent)}%`);
         });
-
-        // 步驟 3: 建立檔案記錄
-        showStatus('步驟 3/4：建立檔案記錄...', 'info');
-        updateProgress(75, '步驟 3/4：建立檔案記錄...');
-
-        const createFileResponse = await fetch(`${API_BASE}/admin/files`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            fileName: file.name,  // 直接使用原始檔名，讓後端處理清理
-            originalFileName: file.name,
-            tempFilePath: tempFilePath,
-            cdnUrl: tempCdnUrl,
-            contentType: file.type,
-            fileSize: file.size,
-            category: category,
-            description: description || undefined,
-          }),
-        });
-
-        if (!createFileResponse.ok) {
-          const error = await createFileResponse.json();
-          throw new Error(error.message || '建立檔案記錄失敗');
-        }
-
-        const fileRecord = await createFileResponse.json();
-
-        // 步驟 4: 確認上傳
-        showStatus('步驟 4/4：確認上傳完成...', 'info');
-        updateProgress(90, '步驟 4/4：確認上傳完成...');
-
-        const confirmResponse = await fetch(`${API_BASE}/admin/files/${fileRecord.id}/confirm-upload`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`,
-          },
-        });
-
-        if (!confirmResponse.ok) {
-          const error = await confirmResponse.json();
-          throw new Error(error.message || '確認上傳失敗');
-        }
-
-        const { file: confirmedFile } = await confirmResponse.json();
 
         // 完成
         updateProgress(100, '完成！');
-        showStatus('檔案上傳成功！', 'success');
-        showResult(confirmedFile);
+        showStatus('上傳成功！檔案已儲存至暫存區', 'success');
+        showPreview(cdnUrl);
 
         setTimeout(() => {
           elements.progressContainer.style.display = 'none';
@@ -582,28 +415,17 @@
       });
     }
 
-    // 顯示結果
-    function showResult(file) {
-      elements.fileId.textContent = file.id;
-      elements.cdnUrl.textContent = file.cdnUrl;
-      elements.filePath.textContent = file.filePath;
+    // 顯示預覽
+    function showPreview(cdnUrl) {
+      elements.cdnUrl.textContent = cdnUrl;
+      elements.previewContainer.style.display = 'block';
+    }
 
-      const metadata = {
-        檔案名稱: file.fileName,
-        原始名稱: file.originalFileName,
-        檔案類型: file.contentType,
-        檔案大小: formatFileSize(file.fileSize),
-        分類: file.category,
-        狀態: file.status === 'uploaded' ? '已上傳' : '暫存',
-        上傳時間: new Date(file.createdAt).toLocaleString('zh-TW'),
-      };
-
-      if (file.description) {
-        metadata.描述 = file.description;
-      }
-
-      elements.metadata.textContent = JSON.stringify(metadata, null, 2);
-      elements.resultContainer.style.display = 'block';
+    // 隱藏預覽
+    function hidePreview() {
+      elements.previewContainer.style.display = 'none';
+      elements.cdnUrl.textContent = '';
+      currentCdnUrl = null;
     }
 
     // CDN URL 點擊複製
@@ -611,7 +433,9 @@
       const text = elements.cdnUrl.textContent;
       navigator.clipboard.writeText(text).then(() => {
         showStatus('CDN URL 已複製到剪貼簿', 'success');
-        setTimeout(hideStatus, 2000);
+        setTimeout(() => {
+          showStatus('上傳成功！檔案已儲存至暫存區', 'success');
+        }, 2000);
       });
     });
   </script>
