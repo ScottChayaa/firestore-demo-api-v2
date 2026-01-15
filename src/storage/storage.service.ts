@@ -128,8 +128,8 @@ export class StorageService {
 
   /**
    * 從 CDN URL 提取檔案路徑
-   * @param url CDN URL (https://storage.googleapis.com/bucket-name/temp/product/2026/01/uuid-file.jpg)
-   * @returns filePath (temp/product/2026/01/uuid-file.jpg)
+   * @param url CDN URL (https://storage.googleapis.com/bucket-name/temp/product/202601/uuid-file.jpg)
+   * @returns filePath (temp/product/202601/uuid-file.jpg)
    */
   extractFilePathFromUrl(url: string): string {
     const match = url.match(/googleapis\.com\/[^/]+\/(.+)$/);
