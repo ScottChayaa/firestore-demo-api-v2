@@ -6,9 +6,9 @@
 
 # 配置
 PROJECT_ID="liang-dev"
-REGION="asia-east1"
+REGION="us-west1"
 SERVICE_NAME="firestore-demo-api-v2"
-DOCKER_REGISTRY="asia-east1-docker.pkg.dev"
+DOCKER_REGISTRY="us-west1-docker.pkg.dev"
 DOCKER_REPO="my-docker"
 ENV_FILE="env.liang-dev.yaml"
 
