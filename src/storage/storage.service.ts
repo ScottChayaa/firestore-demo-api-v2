@@ -138,8 +138,9 @@ export class StorageService {
 
   /**
    * 根據分類取得檔案大小限制和允許類型
+   * 預設 : other (支援全類型)
    */
-  private getFileLimits(category: string): {
+  private getFileLimits(category: string = 'other'): {
     maxSizeMB: number;
     allowedTypes: string[];
   } {
@@ -150,11 +151,12 @@ export class StorageService {
       return fileSizeLimits[category];
     }
 
-    // 否則使用預設配置（向後相容）
+    this.logger.warn(`查無允許 category: ${category}, 使用預設限制`);
+
+    // 使用預設限制（寫死）
     return {
-      maxSizeMB: this.configService.get<number>('storage.defaultMaxFileSizeMB') || 100,
-      allowedTypes:
-        this.configService.get<string[]>('storage.allowedFileTypes') || ['*'],
+      maxSizeMB: 100,
+      allowedTypes: ['*'],
     };
   }
 
@@ -162,21 +164,11 @@ export class StorageService {
    * 驗證檔案
    */
   private validateFile(dto: GenerateUploadUrlDto): void {
-    // 1. 檢查全域大小限制
-    const globalMaxSizeMB = this.configService.get<number>('storage.globalMaxFileSizeMB');
-    const globalMaxSizeBytes = globalMaxSizeMB * 1024 * 1024;
-
-    if (dto.fileSize > globalMaxSizeBytes) {
-      throw new BadRequestException(
-        `檔案大小超過全域限制 (${globalMaxSizeMB}MB)`,
-      );
-    }
-
-    // 2. 取得該分類的限制
+    // 取得該分類的限制
     const limits = this.getFileLimits(dto.category);
     const maxSizeBytes = limits.maxSizeMB * 1024 * 1024;
 
-    // 3. 檔案類型檢查（支援萬用字元 "*"）
+    // 檔案類型檢查（支援萬用字元 "*"）
     if (
       !limits.allowedTypes.includes('*') &&
       !limits.allowedTypes.includes(dto.contentType)
@@ -186,10 +178,10 @@ export class StorageService {
       );
     }
 
-    // 4. 檔案大小檢查
+    // 檔案大小檢查
     if (dto.fileSize > maxSizeBytes) {
       throw new BadRequestException(
-        `檔案大小超過 ${dto.category} 分類限制 (${limits.maxSizeMB}MB)`,
+        `檔案大小超過 ${dto.category} 分類限制 (${limits.maxSizeMB} MB)`,
       );
     }
   }

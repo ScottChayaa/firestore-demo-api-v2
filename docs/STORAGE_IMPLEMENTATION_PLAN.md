@@ -183,12 +183,6 @@ GCS_BUCKET_NAME=
 # Signed URL 有效期限（分鐘）
 GCS_SIGNED_URL_EXPIRES_MINUTES=15
 
-# 允許的檔案類型（MIME types，逗號分隔）
-GCS_ALLOWED_FILE_TYPES=image/jpeg,image/png,image/gif,image/webp
-
-# 最大檔案大小（MB）
-GCS_MAX_FILE_SIZE_MB=5
-
 # 檔案路徑前綴
 GCS_FILE_PATH_PREFIX=uploads
 ```
@@ -199,15 +193,8 @@ GCS_FILE_PATH_PREFIX=uploads
 ```typescript
 // Google Cloud Storage Configuration
 storage: {
-  bucketName: config.GCS_BUCKET_NAME || `${config.FIREBASE_PROJECT_ID}.appspot.com`,
+  bucketName: config.GCS_BUCKET_NAME,
   signedUrlExpiresMinutes: parseInt(config.GCS_SIGNED_URL_EXPIRES_MINUTES, 10) || 15,
-  allowedFileTypes: config.GCS_ALLOWED_FILE_TYPES?.split(',') || [
-    'image/jpeg',
-    'image/png',
-    'image/gif',
-    'image/webp',
-  ],
-  maxFileSizeMB: parseInt(config.GCS_MAX_FILE_SIZE_MB, 10) || 5,
   filePathPrefix: config.GCS_FILE_PATH_PREFIX || 'uploads',
 },
 ```

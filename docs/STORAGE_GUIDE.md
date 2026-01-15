@@ -72,8 +72,6 @@ gsutil cors set cors.json gs://YOUR_BUCKET_NAME
 # Google Cloud Storage Configuration
 GCS_BUCKET_NAME=your-project.appspot.com
 GCS_SIGNED_URL_EXPIRES_MINUTES=15
-GCS_ALLOWED_FILE_TYPES=image/jpeg,image/png,image/gif,image/webp
-GCS_MAX_FILE_SIZE_MB=5
 GCS_FILE_PATH_PREFIX=uploads
 ```
 
@@ -83,8 +81,6 @@ GCS_FILE_PATH_PREFIX=uploads
 |------|------|--------|
 | `GCS_BUCKET_NAME` | GCS Bucket 名稱 | `{project-id}.appspot.com` |
 | `GCS_SIGNED_URL_EXPIRES_MINUTES` | Signed URL 有效期限（分鐘） | `15` |
-| `GCS_ALLOWED_FILE_TYPES` | 允許的檔案類型 | `image/jpeg,image/png,image/gif,image/webp` |
-| `GCS_MAX_FILE_SIZE_MB` | 最大檔案大小（MB） | `5` |
 | `GCS_FILE_PATH_PREFIX` | 檔案路徑前綴 | `uploads` |
 
 ### 3. Firebase 權限設定
@@ -396,7 +392,6 @@ async function createProductWithImage(productData, imageFile, adminToken) {
 
 **解決方法**：
 1. 確認檔案格式為 JPEG, PNG, GIF 或 WebP
-2. 若需要其他格式，修改 `.env` 中的 `GCS_ALLOWED_FILE_TYPES`
 
 ### 4. 檔案大小超過限制
 
@@ -404,7 +399,6 @@ async function createProductWithImage(productData, imageFile, adminToken) {
 
 **解決方法**：
 1. 壓縮圖片後再上傳
-2. 或調整 `.env` 中的 `GCS_MAX_FILE_SIZE_MB`（需考慮成本）
 
 ### 5. Signed URL 過期
 
