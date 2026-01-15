@@ -31,9 +31,11 @@ export class StorageAdminController {
    */
   @Post('generate-upload-url')
   @HttpCode(HttpStatus.OK)
-  async generateUploadUrl(@Body() dto: GenerateUploadUrlDto) {
+  async generateUploadUrl(
+    @Body() dto: GenerateUploadUrlDto
+  ) {
     this.logger.info(
-      { fileName: dto.fileName, category: dto.category },
+      { fileName: dto.fileName, category: dto.category, entity: dto.category},
       '生成上傳 URL 請求',
     );
     const result = await this.storageService.generateUploadUrl(dto);

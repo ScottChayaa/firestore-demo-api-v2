@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>GCS 圖片上傳測試</title>
+  <title>產品圖片上傳測試</title>
   <style>
     * {
       margin: 0;
@@ -199,7 +199,7 @@
 </head>
 <body>
   <div class="container">
-    <h1>📸 GCS 圖片上傳測試</h1>
+    <h1>📸 產品圖片上傳測試</h1>
     <p class="subtitle">測試 Google Cloud Storage 圖片上傳功能</p>
 
     <!-- Token 輸入區 -->
@@ -345,7 +345,8 @@
             fileName: file.name,
             contentType: file.type,
             fileSize: file.size,
-            category: 'product',
+            category: 'image',
+            entity: 'product',
           }),
         });
 

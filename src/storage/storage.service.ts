@@ -105,7 +105,7 @@ export class StorageService {
 
   /**
    * 生成檔案路徑（暫存區）
-   * 格式: temp/{category}/{year}{month}/{uuid}-{sanitizedFileName}
+   * 格式: temp/{entity}/{year}{month}/{uuid}-{sanitizedFileName}
    */
   private generateFilePath(dto: GenerateUploadUrlDto): string {
     const prefix = 'temp'; // 使用暫存區
@@ -115,7 +115,7 @@ export class StorageService {
     const uuid = randomUUID();
     const sanitizedFileName = this.sanitizeFileName(dto.fileName);
 
-    return `${prefix}/${dto.category}/${year}${month}/${uuid}-${sanitizedFileName}`;
+    return `${prefix}/${dto.entity}/${year}${month}/${uuid}-${sanitizedFileName}`;
   }
 
   /**
