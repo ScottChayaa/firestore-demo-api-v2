@@ -3,19 +3,39 @@ import { PinoLogger, InjectPinoLogger } from 'nestjs-pino';
 import { Bucket } from '@google-cloud/storage';
 import sharp from 'sharp';
 
+type OutputFormat = 'jpeg' | 'webp';
+
 interface ThumbnailConfig {
+  name: string;
   width: number;
   height: number;
-  suffix: string;
+  enabled: boolean;
+}
+
+interface ThumbnailSettings {
+  // 要處理的來源資料夾
+  sourceFolders: string[];
+  // 輸出格式: 'jpeg' | 'webp'
+  outputFormat: OutputFormat;
+  // 輸出品質 (1-100)
+  outputQuality: number;
+  // 各尺寸設定
+  sizes: ThumbnailConfig[];
 }
 
 @Injectable()
 export class ThumbnailService {
-  private readonly THUMBNAIL_CONFIGS: ThumbnailConfig[] = [
-    { width: 150, height: 150, suffix: 'small' },
-    { width: 300, height: 300, suffix: 'medium' },
-    { width: 600, height: 600, suffix: 'large' },
-  ];
+  // 縮圖設定
+  private readonly settings: ThumbnailSettings = {
+    sourceFolders: ['uploads', 'temp', 'images'],
+    outputFormat: 'webp',
+    outputQuality: 80,
+    sizes: [
+      { name: 'small', width: 150, height: 150, enabled: true },
+      { name: 'medium', width: 300, height: 300, enabled: true },
+      { name: 'large', width: 600, height: 600, enabled: true },
+    ],
+  };
 
   private readonly SUPPORTED_IMAGE_TYPES = [
     'image/jpeg',
@@ -38,6 +58,14 @@ export class ThumbnailService {
   isProcessableImage(filePath: string, contentType?: string): boolean {
     // 跳過已在 thumbs 資料夾的檔案（防止無限迴圈）
     if (filePath.startsWith('thumbs/')) {
+      return false;
+    }
+
+    // 檢查是否在允許的來源資料夾中
+    const isInSourceFolder = this.settings.sourceFolders.some((folder) =>
+      filePath.startsWith(`${folder}/`),
+    );
+    if (!isInSourceFolder) {
       return false;
     }
 
@@ -67,26 +95,21 @@ export class ThumbnailService {
       const [buffer] = await file.download();
 
       const thumbnails: string[] = [];
+      const enabledSizes = this.settings.sizes.filter((size) => size.enabled);
 
-      for (const config of this.THUMBNAIL_CONFIGS) {
-        const thumbnailPath = this.generateThumbnailPath(filePath, config.suffix);
+      for (const config of enabledSizes) {
+        const thumbnailPath = this.generateThumbnailPath(filePath, config.name);
 
-        // 縮放圖片
-        const resizedBuffer = await sharp(buffer)
-          .resize(config.width, config.height, {
-            fit: 'inside',
-            withoutEnlargement: true,
-          })
-          .jpeg({ quality: 80 })
-          .toBuffer();
+        // 縮放圖片並轉換格式
+        const resizedBuffer = await this.processImage(buffer, config);
 
         // 上傳縮圖
         const thumbnailFile = this.bucket.file(thumbnailPath);
         await thumbnailFile.save(resizedBuffer, {
-          contentType: 'image/jpeg',
+          contentType: this.getContentType(),
           metadata: {
             originalPath: filePath,
-            thumbnailSize: config.suffix,
+            thumbnailSize: config.name,
           },
         });
 
@@ -113,22 +136,55 @@ export class ThumbnailService {
   }
 
   /**
-   * 產生縮圖路徑
-   * 範例: uploads/product/202601/uuid-file.jpg -> thumbs/product/202601/uuid-file_small.jpg
+   * 處理圖片縮放和格式轉換
    */
-  private generateThumbnailPath(originalPath: string, suffix: string): string {
-    // 將 uploads/ 或 temp/ 替換成 thumbs/
-    const pathWithThumbsPrefix = originalPath.replace(
-      /^(uploads|temp)\//,
-      'thumbs/',
-    );
+  private async processImage(
+    buffer: Buffer,
+    config: ThumbnailConfig,
+  ): Promise<Buffer> {
+    const resized = sharp(buffer).resize(config.width, config.height, {
+      fit: 'inside',
+      withoutEnlargement: true,
+    });
 
-    // 在副檔名前插入 suffix
-    const lastDotIndex = pathWithThumbsPrefix.lastIndexOf('.');
-    if (lastDotIndex === -1) {
-      return `${pathWithThumbsPrefix}_${suffix}.jpg`;
+    if (this.settings.outputFormat === 'webp') {
+      return resized.webp({ quality: this.settings.outputQuality }).toBuffer();
     }
 
-    return `${pathWithThumbsPrefix.substring(0, lastDotIndex)}_${suffix}.jpg`;
+    return resized.jpeg({ quality: this.settings.outputQuality }).toBuffer();
+  }
+
+  /**
+   * 取得輸出的 content type
+   */
+  private getContentType(): string {
+    return this.settings.outputFormat === 'webp' ? 'image/webp' : 'image/jpeg';
+  }
+
+  /**
+   * 取得輸出的副檔名
+   */
+  private getOutputExtension(): string {
+    return this.settings.outputFormat === 'webp' ? 'webp' : 'jpg';
+  }
+
+  /**
+   * 產生縮圖路徑
+   * 範例: uploads/product/202601/uuid-file.jpg -> thumbs/small/product/202601/uuid-file.webp
+   */
+  private generateThumbnailPath(originalPath: string, sizeName: string): string {
+    // 移除來源資料夾前綴，取得相對路徑
+    const sourceFolderPattern = new RegExp(
+      `^(${this.settings.sourceFolders.join('|')})/`,
+    );
+    const relativePath = originalPath.replace(sourceFolderPattern, '');
+
+    // 替換副檔名
+    const lastDotIndex = relativePath.lastIndexOf('.');
+    const pathWithoutExt =
+      lastDotIndex === -1 ? relativePath : relativePath.substring(0, lastDotIndex);
+
+    // 組合新路徑: thumbs/{size}/{relativePath}.{ext}
+    return `thumbs/${sizeName}/${pathWithoutExt}.${this.getOutputExtension()}`;
   }
 }
