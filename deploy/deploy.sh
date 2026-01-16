@@ -7,9 +7,10 @@
 # 配置
 PROJECT_ID="liang-dev"
 REGION="us-west1"
-SERVICE_NAME="firestore-demo-api-v2"
+CLOUD_RUN_SERVICE="firestore-demo-api-v2"
 DOCKER_REGISTRY="us-west1-docker.pkg.dev"
 DOCKER_REPO="my-docker"
+DOCKER_IMAGE_NAME="firestore-demo-api-v2"
 ENV_FILE="env.liang-dev.yaml"
 
 # 顏色定義
@@ -171,7 +172,7 @@ build_docker_image() {
   echo ""
   echo -e "${BLUE}[4/9] 建立 Docker 映像...${NC}"
 
-  IMAGE_NAME="$DOCKER_REGISTRY/$PROJECT_ID/$DOCKER_REPO/$SERVICE_NAME:$VERSION"
+  IMAGE_NAME="$DOCKER_REGISTRY/$PROJECT_ID/$DOCKER_REPO/$DOCKER_IMAGE_NAME:$VERSION"
 
   docker build -t "$IMAGE_NAME" .
 
@@ -221,7 +222,7 @@ deploy_to_cloud_run() {
   echo ""
   echo -e "${BLUE}[8/9] 部署到 Cloud Run...${NC}"
 
-  gcloud run deploy $SERVICE_NAME \
+  gcloud run deploy $CLOUD_RUN_SERVICE \
     --image "$IMAGE_NAME" \
     --platform managed \
     --region $REGION \
@@ -242,7 +243,7 @@ show_deployment_info() {
   echo ""
   echo -e "${BLUE}[9/9] 取得部署資訊...${NC}"
 
-  SERVICE_URL=$(gcloud run services describe $SERVICE_NAME \
+  SERVICE_URL=$(gcloud run services describe $CLOUD_RUN_SERVICE \
     --region $REGION \
     --format="value(status.url)")
 
