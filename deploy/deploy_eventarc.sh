@@ -12,7 +12,7 @@ CLOUD_RUN_SERVICE="firestore-demo-api-v2"
 CLOUD_RUN_REGION="us-west1"
 DESTINATION_PATH="/api/webhooks/gcs-finalized"
 GCS_BUCKET="firestore-demo-api-v2"
-SERVICE_ACCOUNT_EMAIL="eventarc-trigger-sa@${PROJECT_ID}.iam.gserviceaccount.com"
+SERVICE_ACCOUNT_EMAIL="138350987861-compute@developer.gserviceaccount.com" # 替換成你的 IAM account
 
 # 顏色設定
 RED='\033[0;31m'
@@ -166,19 +166,8 @@ main() {
 
     # Step 1: 檢查 trigger 是否已存在
     if check_trigger_exists; then
-        log_warn "Eventarc trigger '${TRIGGER_NAME}' 已存在"
-        echo ""
-        read -p "是否要刪除並重新建立? (y/n): " choice
-        if [[ "$choice" == "y" || "$choice" == "Y" ]]; then
-            log_info "刪除現有 trigger..."
-            gcloud eventarc triggers delete "${TRIGGER_NAME}" \
-                --project="${PROJECT_ID}" \
-                --location="${LOCATION}" \
-                --quiet
-        else
-            log_info "保留現有 trigger，結束腳本"
-            exit 0
-        fi
+        log_info "Eventarc trigger '${TRIGGER_NAME}' 已存在，無需重複建立"
+        exit 0
     fi
 
     # Step 2: 檢查 Service Account 是否存在
