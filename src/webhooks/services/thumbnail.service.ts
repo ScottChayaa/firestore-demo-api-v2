@@ -13,13 +13,21 @@ interface ThumbnailConfig {
 }
 
 interface ThumbnailSettings {
-  // 要處理的來源資料夾
+  /**
+   * 要處理的來源資料夾
+   */
   sourceFolders: string[];
-  // 輸出格式: 'jpeg' | 'webp'
+  /**
+   * 輸出格式: 'jpeg' | 'webp'
+   */
   outputFormat: OutputFormat;
-  // 輸出品質 (1-100)
+  /**
+   * 輸出品質 (1-100)
+   */
   outputQuality: number;
-  // 各尺寸設定
+  /**
+   * 各尺寸設定
+   */
   sizes: ThumbnailConfig[];
 }
 
@@ -27,7 +35,7 @@ interface ThumbnailSettings {
 export class ThumbnailService {
   // 縮圖設定
   private readonly settings: ThumbnailSettings = {
-    sourceFolders: ['uploads', 'temp', 'images'],
+    sourceFolders: ['uploads'],
     outputFormat: 'webp',
     outputQuality: 80,
     sizes: [
@@ -50,12 +58,12 @@ export class ThumbnailService {
     @Inject('STORAGE') private readonly bucket: Bucket,
     @InjectPinoLogger(ThumbnailService.name)
     private readonly logger: PinoLogger,
-  ) {}
+  ) { }
 
   /**
-   * 檢查檔案是否為可處理的圖片
+   * 檢查檔案是否為可處理的資料夾
    */
-  isProcessableImage(filePath: string, contentType?: string): boolean {
+  isProcessableFolder(filePath: string): boolean {
     // 跳過已在 thumbs 資料夾的檔案（防止無限迴圈）
     if (filePath.startsWith('thumbs/')) {
       return false;
@@ -69,6 +77,13 @@ export class ThumbnailService {
       return false;
     }
 
+    return true;
+  }
+
+  /**
+   * 檢查檔案是否為可處理的圖片
+   */
+  isProcessableImage(filePath: string, contentType?: string): boolean {
     // 檢查 content type
     if (contentType && this.SUPPORTED_IMAGE_TYPES.includes(contentType)) {
       return true;
@@ -82,57 +97,41 @@ export class ThumbnailService {
   /**
    * 產生縮圖
    */
-  async generateThumbnails(filePath: string): Promise<{
-    success: boolean;
-    thumbnails?: string[];
-    error?: string;
-  }> {
-    try {
-      this.logger.info({ filePath }, '開始產生縮圖');
+  async generateThumbnails(filePath: string): Promise<void> {
+    this.logger.info(`開始產生縮圖: ${filePath}`);
 
-      // 下載原始檔案
-      const file = this.bucket.file(filePath);
-      const [buffer] = await file.download();
+    // 下載原始檔案
+    const file = this.bucket.file(filePath);
+    const [buffer] = await file.download();
 
-      const thumbnails: string[] = [];
-      const enabledSizes = this.settings.sizes.filter((size) => size.enabled);
+    const thumbnails: string[] = [];
+    const enabledSizes = this.settings.sizes.filter((size) => size.enabled);
 
-      for (const config of enabledSizes) {
-        const thumbnailPath = this.generateThumbnailPath(filePath, config.name);
+    for (const config of enabledSizes) {
+      const thumbnailPath = this.generateThumbnailPath(filePath, config.name);
 
-        // 縮放圖片並轉換格式
-        const resizedBuffer = await this.processImage(buffer, config);
+      // 縮放圖片並轉換格式
+      const resizedBuffer = await this.processImage(buffer, config);
 
-        // 上傳縮圖
-        const thumbnailFile = this.bucket.file(thumbnailPath);
-        await thumbnailFile.save(resizedBuffer, {
-          contentType: this.getContentType(),
-          metadata: {
-            originalPath: filePath,
-            thumbnailSize: config.name,
-          },
-        });
+      // 上傳縮圖
+      const thumbnailFile = this.bucket.file(thumbnailPath);
+      await thumbnailFile.save(resizedBuffer, {
+        contentType: this.getContentType(),
+        metadata: {
+          originalPath: filePath,
+          thumbnailSize: config.name,
+        },
+      });
 
-        thumbnails.push(thumbnailPath);
-        this.logger.info(
-          { thumbnailPath, width: config.width, height: config.height },
-          '縮圖建立完成',
-        );
-      }
-
+      thumbnails.push(thumbnailPath);
       this.logger.info(
-        { filePath, thumbnailCount: thumbnails.length },
-        '所有縮圖產生完成',
+        `${config.name} 縮圖建立完成 : ${thumbnailPath}`,
       );
-
-      return { success: true, thumbnails };
-    } catch (error: any) {
-      this.logger.error(
-        { filePath, error: error.message },
-        '縮圖產生失敗',
-      );
-      return { success: false, error: error.message };
     }
+
+    this.logger.info(
+      `所有縮圖產生完成: ${filePath}`,
+    );
   }
 
   /**
@@ -170,21 +169,17 @@ export class ThumbnailService {
 
   /**
    * 產生縮圖路徑
-   * 範例: uploads/product/202601/uuid-file.jpg -> thumbs/small/product/202601/uuid-file.webp
+   * 範例: uploads/product/202601/uuid-file.jpg -> thumbs/small/uploads/product/202601/uuid-file.webp
    */
   private generateThumbnailPath(originalPath: string, sizeName: string): string {
-    // 移除來源資料夾前綴，取得相對路徑
-    const sourceFolderPattern = new RegExp(
-      `^(${this.settings.sourceFolders.join('|')})/`,
-    );
-    const relativePath = originalPath.replace(sourceFolderPattern, '');
+    const relativePath = originalPath;
 
     // 替換副檔名
     const lastDotIndex = relativePath.lastIndexOf('.');
     const pathWithoutExt =
       lastDotIndex === -1 ? relativePath : relativePath.substring(0, lastDotIndex);
 
-    // 組合新路徑: thumbs/{size}/{relativePath}.{ext}
+    // 組合新路徑: thumbs/{size}/{sourceFolders}/{relativePath}.{ext}
     return `thumbs/${sizeName}/${pathWithoutExt}.${this.getOutputExtension()}`;
   }
 }

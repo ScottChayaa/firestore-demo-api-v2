@@ -5,6 +5,7 @@ import {
   Headers,
   HttpCode,
   HttpStatus,
+  HttpException
 } from '@nestjs/common';
 import { Public } from '../../common/decorators/public.decorator';
 import { PinoLogger, InjectPinoLogger } from 'nestjs-pino';
@@ -32,7 +33,7 @@ export class WebhooksController {
     private readonly thumbnailService: ThumbnailService,
     @InjectPinoLogger(WebhooksController.name)
     private readonly logger: PinoLogger,
-  ) {}
+  ) { }
 
   /**
    * POST /api/webhooks/gcs-finalized
@@ -57,43 +58,36 @@ export class WebhooksController {
         contentType,
         size: body.size,
       },
-      'Received GCS finalized event',
+      '收到 GCS finalized event',
     );
 
-    // 檢查是否為可處理的圖片
-    if (!filePath || !this.thumbnailService.isProcessableImage(filePath, contentType)) {
-      this.logger.info(
-        { filePath, contentType },
-        'Skipping: not an image or already a thumbnail',
-      );
+    // 檢查是否為可處理的路徑
+    if (!filePath || !this.thumbnailService.isProcessableFolder(filePath)) {
+      this.logger.info('略過: 非可處理的路徑');
       return {
-        message: 'File skipped (not an image or already processed)',
+        message: '略過: 非可處理的路徑',
         cloudEventId,
         filePath,
       };
     }
 
-    // 產生縮圖
-    const result = await this.thumbnailService.generateThumbnails(filePath);
+    // 檢查是否為可處理的圖片
+    if (!filePath || !this.thumbnailService.isProcessableImage(filePath, contentType)) {
+      this.logger.info('略過: 非圖片');
+      return {
+        message: '略過: 非圖片',
+        cloudEventId,
+        filePath,
+      };
+    }
 
-    if (result.success) {
-      return {
-        message: 'Thumbnails generated successfully',
-        cloudEventId,
-        filePath,
-        thumbnails: result.thumbnails,
-      };
-    } else {
-      this.logger.error(
-        { filePath, error: result.error },
-        'Failed to generate thumbnails',
-      );
-      return {
-        message: 'Thumbnail generation failed',
-        cloudEventId,
-        filePath,
-        error: result.error,
-      };
+    try {
+      // 產生縮圖
+      await this.thumbnailService.generateThumbnails(filePath);
+    } catch (error: any) {
+      this.logger.error({ error }, `縮圖產生失敗: ${filePath}`);
+      //throw new HttpException(`縮圖產生失敗: ${filePath}`, 500); // TODO: 如果回傳 500, Eventarc 會有重試機制再次呼叫
+      return { success: false, error: error.message };
     }
   }
 }
