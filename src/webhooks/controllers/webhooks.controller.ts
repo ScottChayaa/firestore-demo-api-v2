@@ -8,6 +8,7 @@ import {
 } from '@nestjs/common';
 import { Public } from '../../common/decorators/public.decorator';
 import { PinoLogger, InjectPinoLogger } from 'nestjs-pino';
+import { ThumbnailService } from '../services/thumbnail.service';
 
 /**
  * GCS CloudEvent 結構
@@ -28,13 +29,14 @@ interface GcsCloudEvent {
 @Controller('webhooks')
 export class WebhooksController {
   constructor(
+    private readonly thumbnailService: ThumbnailService,
     @InjectPinoLogger(WebhooksController.name)
     private readonly logger: PinoLogger,
   ) {}
 
   /**
    * POST /api/webhooks/gcs-finalized
-   * 接收 Eventarc GCS object.finalized 事件
+   * 接收 Eventarc GCS object.finalized 事件並處理縮圖
    */
   @Public()
   @Post('gcs-finalized')
@@ -43,39 +45,55 @@ export class WebhooksController {
     @Body() body: GcsCloudEvent,
     @Headers() headers: Record<string, string>,
   ) {
-    // 從 headers 取得 CloudEvent 屬性
     const cloudEventId = headers['ce-id'];
-    const cloudEventSource = headers['ce-source'];
-    const cloudEventType = headers['ce-type'];
-    const cloudEventSubject = headers['ce-subject'];
-    const cloudEventTime = headers['ce-time'];
+    const filePath = body.name;
+    const contentType = body.contentType;
 
     this.logger.info(
       {
         cloudEventId,
-        cloudEventType,
-        cloudEventSource,
-        cloudEventSubject,
-        cloudEventTime,
         bucket: body.bucket,
-        name: body.name,
-        contentType: body.contentType,
+        filePath,
+        contentType,
         size: body.size,
-        timeCreated: body.timeCreated,
       },
       'Received GCS finalized event',
     );
 
-    // 目前只回傳成功，確認事件已收到
-    return {
-      message: 'GCS finalized event received',
-      cloudEventId,
-      file: {
-        bucket: body.bucket,
-        name: body.name,
-        contentType: body.contentType,
-        size: body.size,
-      },
-    };
+    // 檢查是否為可處理的圖片
+    if (!filePath || !this.thumbnailService.isProcessableImage(filePath, contentType)) {
+      this.logger.info(
+        { filePath, contentType },
+        'Skipping: not an image or already a thumbnail',
+      );
+      return {
+        message: 'File skipped (not an image or already processed)',
+        cloudEventId,
+        filePath,
+      };
+    }
+
+    // 產生縮圖
+    const result = await this.thumbnailService.generateThumbnails(filePath);
+
+    if (result.success) {
+      return {
+        message: 'Thumbnails generated successfully',
+        cloudEventId,
+        filePath,
+        thumbnails: result.thumbnails,
+      };
+    } else {
+      this.logger.error(
+        { filePath, error: result.error },
+        'Failed to generate thumbnails',
+      );
+      return {
+        message: 'Thumbnail generation failed',
+        cloudEventId,
+        filePath,
+        error: result.error,
+      };
+    }
   }
 }
