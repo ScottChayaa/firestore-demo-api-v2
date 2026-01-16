@@ -11,7 +11,10 @@ import helmet from 'helmet';
 import { join } from 'path';
 
 async function bootstrap() {
-  const app = await NestFactory.create<NestExpressApplication>(AppModule, { bufferLogs: true });
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
+    bufferLogs: true,
+    logger: false, // 關閉 NestJS 內建日誌（路由映射訊息）
+  });
 
   // 使用 Pino Logger
   app.useLogger(app.get(Logger));
