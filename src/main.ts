@@ -6,18 +6,13 @@ import { AppModule } from './app.module';
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 import { ThrottlerExceptionFilter } from './common/filters/throttler-exception.filter';
 import { validationExceptionFactory } from './common/factories/validation-exception.factory';
-import { Logger } from 'nestjs-pino';
 import helmet from 'helmet';
 import { join } from 'path';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
-    bufferLogs: true,
-    logger: false, // 關閉 NestJS 內建日誌（路由映射訊息）
+    logger: false, // 關閉 NestJS 系統日誌（路由映射等訊息）
   });
-
-  // 使用 Pino Logger
-  app.useLogger(app.get(Logger));
 
   // 配置靜態檔案服務（用於測試頁面）
   app.useStaticAssets(join(__dirname, '..', 'public'));
