@@ -49,7 +49,7 @@ export class MailService {
     });
 
     this.logger.info(
-      { host, port, user, fromEmail: this.fromEmail },
+      { host, port, user, fromName: this.fromName },
       'Nodemailer Transporter 已初始化',
     );
   }

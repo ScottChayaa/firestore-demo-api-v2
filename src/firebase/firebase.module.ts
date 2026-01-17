@@ -3,6 +3,9 @@ import { ConfigService } from '@nestjs/config';
 import * as admin from 'firebase-admin';
 import { readFileSync } from 'fs';
 
+/**
+ * 全域 Firebase 模組
+ */
 @Global()
 @Module({
   providers: [

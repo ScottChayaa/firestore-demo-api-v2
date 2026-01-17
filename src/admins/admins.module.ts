@@ -5,7 +5,6 @@ import { AdminsRepository } from './repositories/admins.repository';
 import { FirebaseModule } from '../firebase/firebase.module';
 
 @Module({
-  imports: [FirebaseModule],
   controllers: [AdminsAdminController],
   providers: [AdminsAdminService, AdminsRepository],
   exports: [AdminsAdminService, AdminsRepository],
