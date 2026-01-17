@@ -1,5 +1,6 @@
-import { Module, Global, Logger } from '@nestjs/common';
+import { Module, Global } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { PinoLogger } from 'nestjs-pino';
 import * as admin from 'firebase-admin';
 import { readFileSync } from 'fs';
 import {
@@ -17,8 +18,8 @@ import {
   providers: [
     {
       provide: FIREBASE_APP,
-      useFactory: (configService: ConfigService) => {
-        const logger = new Logger('FirebaseModule');
+      useFactory: (configService: ConfigService, logger: PinoLogger) => {
+        logger.setContext('FirebaseModule');
 
         try {
           let credentials: any;
@@ -34,12 +35,12 @@ import {
           );
 
           if (credentialsBase64) {
-            logger.log('Loading Firebase credentials from Base64 environment variable');
+            logger.info('Loading Firebase credentials from Base64 environment variable');
             credentials = JSON.parse(
               Buffer.from(credentialsBase64, 'base64').toString('utf-8'),
             );
           } else if (credentialsPath) {
-            logger.log(`Loading Firebase credentials from file: ${credentialsPath}`);
+            logger.info(`Loading Firebase credentials from file: ${credentialsPath}`);
             const credentialsFile = readFileSync(credentialsPath, 'utf-8');
             credentials = JSON.parse(credentialsFile);
           } else {
@@ -56,16 +57,16 @@ import {
             databaseURL: `https://${projectId}.firebaseio.com`,
           });
         } catch (error) {
-          logger.error('Failed to initialize Firebase Admin SDK:', error);
+          logger.error({ err: error }, 'Failed to initialize Firebase Admin SDK');
           return null;
         }
       },
-      inject: [ConfigService],
+      inject: [ConfigService, PinoLogger],
     },
     {
       provide: FIRESTORE,
-      useFactory: (app: admin.app.App | null, configService: ConfigService) => {
-        const logger = new Logger('FirebaseModule');
+      useFactory: (app: admin.app.App | null, configService: ConfigService, logger: PinoLogger) => {
+        logger.setContext('FirebaseModule');
 
         if (!app) {
           logger.warn('Firestore not available (Firebase not initialized)');
@@ -81,19 +82,19 @@ import {
             databaseId,
             ignoreUndefinedProperties: true,  // 全域忽略 undefined (create 資料時忽略 undefined 參數)
           });
-          logger.log(`Firestore connected to database: ${databaseId}`);
+          logger.info(`Firestore connected to database: ${databaseId}`);
         } else {
-          logger.log('Firestore connected to (default) database');
+          logger.info('Firestore connected to (default) database');
         }
 
         return db;
       },
-      inject: [FIREBASE_APP, ConfigService],
+      inject: [FIREBASE_APP, ConfigService, PinoLogger],
     },
     {
       provide: FIREBASE_AUTH,
-      useFactory: (app: admin.app.App | null) => {
-        const logger = new Logger('FirebaseModule');
+      useFactory: (app: admin.app.App | null, logger: PinoLogger) => {
+        logger.setContext('FirebaseModule');
 
         if (!app) {
           logger.warn(
@@ -103,15 +104,15 @@ import {
         }
 
         const auth = app.auth();
-        logger.log('Firebase Auth initialized successfully');
+        logger.info('Firebase Auth initialized successfully');
         return auth;
       },
-      inject: [FIREBASE_APP],
+      inject: [FIREBASE_APP, PinoLogger],
     },
     {
       provide: STORAGE,
-      useFactory: (app: admin.app.App | null, configService: ConfigService) => {
-        const logger = new Logger('FirebaseModule');
+      useFactory: (app: admin.app.App | null, configService: ConfigService, logger: PinoLogger) => {
+        logger.setContext('FirebaseModule');
 
         if (!app) {
           logger.warn(
@@ -122,10 +123,10 @@ import {
 
         const bucketName = configService.get<string>('storage.bucketName');
         const bucket = app.storage().bucket(bucketName);
-        logger.log(`Firebase Storage initialized with bucket: ${bucketName}`);
+        logger.info(`Firebase Storage initialized with bucket: ${bucketName}`);
         return bucket;
       },
-      inject: [FIREBASE_APP, ConfigService],
+      inject: [FIREBASE_APP, ConfigService, PinoLogger],
     },
   ],
   exports: [FIREBASE_APP, FIRESTORE, FIREBASE_AUTH, STORAGE],
