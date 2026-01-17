@@ -11,7 +11,7 @@ import { join } from 'path';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
-    // logger: ['error'], // 只顯示錯誤和警告
+    logger: ['error'], // 只顯示錯誤
   });
 
   // 配置靜態檔案服務（用於測試頁面）
