@@ -13,11 +13,12 @@ import { UpdateMemberDto } from '../dto/update-member.dto';
 import { MemberQueryDto } from '../dto/member-query.dto';
 import { Member } from '../entities/member.entity';
 import { PaginationResult } from '../../common/pagination/pagination.interface';
+import { FIREBASE_AUTH } from '../../firebase/firebase.constants';
 
 @Injectable()
 export class MembersAdminService {
   constructor(
-    @Inject('FIREBASE_AUTH') private readonly auth: admin.auth.Auth,
+    @Inject(FIREBASE_AUTH) private readonly auth: admin.auth.Auth,
     private readonly membersRepo: MembersRepository,
   ) {}
 

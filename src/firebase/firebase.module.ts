@@ -1,7 +1,13 @@
-import { Module, Global } from '@nestjs/common';
+import { Module, Global, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as admin from 'firebase-admin';
 import { readFileSync } from 'fs';
+import {
+  FIREBASE_APP,
+  FIRESTORE,
+  FIREBASE_AUTH,
+  STORAGE,
+} from './firebase.constants';
 
 /**
  * 全域 Firebase 模組
@@ -10,8 +16,10 @@ import { readFileSync } from 'fs';
 @Module({
   providers: [
     {
-      provide: 'FIREBASE_APP',
+      provide: FIREBASE_APP,
       useFactory: (configService: ConfigService) => {
+        const logger = new Logger('FirebaseModule');
+
         try {
           let credentials: any;
 
@@ -26,17 +34,17 @@ import { readFileSync } from 'fs';
           );
 
           if (credentialsBase64) {
-            console.log('📝 Loading Firebase credentials from Base64 environment variable');
+            logger.log('Loading Firebase credentials from Base64 environment variable');
             credentials = JSON.parse(
               Buffer.from(credentialsBase64, 'base64').toString('utf-8'),
             );
           } else if (credentialsPath) {
-            console.log(`📝 Loading Firebase credentials from file: ${credentialsPath}`);
+            logger.log(`Loading Firebase credentials from file: ${credentialsPath}`);
             const credentialsFile = readFileSync(credentialsPath, 'utf-8');
             credentials = JSON.parse(credentialsFile);
           } else {
-            console.warn(
-              '⚠️  Firebase credentials not found (set GOOGLE_CREDENTIALS_BASE64 or GOOGLE_CREDENTIALS_PATH)',
+            logger.warn(
+              'Firebase credentials not found (set GOOGLE_CREDENTIALS_BASE64 or GOOGLE_CREDENTIALS_PATH)',
             );
             return null;
           }
@@ -48,17 +56,19 @@ import { readFileSync } from 'fs';
             databaseURL: `https://${projectId}.firebaseio.com`,
           });
         } catch (error) {
-          console.error('❌ Failed to initialize Firebase Admin SDK:', error);
+          logger.error('Failed to initialize Firebase Admin SDK:', error);
           return null;
         }
       },
       inject: [ConfigService],
     },
     {
-      provide: 'FIRESTORE',
+      provide: FIRESTORE,
       useFactory: (app: admin.app.App | null, configService: ConfigService) => {
+        const logger = new Logger('FirebaseModule');
+
         if (!app) {
-          console.warn('⚠️  Firestore not available (Firebase not initialized)');
+          logger.warn('Firestore not available (Firebase not initialized)');
           return null;
         }
 
@@ -67,53 +77,57 @@ import { readFileSync } from 'fs';
 
         // 設置 database ID（如果不是 default）
         if (databaseId && databaseId !== '(default)') {
-          db.settings({ 
+          db.settings({
             databaseId,
             ignoreUndefinedProperties: true,  // 全域忽略 undefined (create 資料時忽略 undefined 參數)
           });
-          console.log(`✅ Firestore connected to database: ${databaseId}`);
+          logger.log(`Firestore connected to database: ${databaseId}`);
         } else {
-          console.log('✅ Firestore connected to (default) database');
+          logger.log('Firestore connected to (default) database');
         }
 
         return db;
       },
-      inject: ['FIREBASE_APP', ConfigService],
+      inject: [FIREBASE_APP, ConfigService],
     },
     {
-      provide: 'FIREBASE_AUTH',
+      provide: FIREBASE_AUTH,
       useFactory: (app: admin.app.App | null) => {
+        const logger = new Logger('FirebaseModule');
+
         if (!app) {
-          console.warn(
-            '⚠️  Firebase Auth not available (Firebase not initialized)',
+          logger.warn(
+            'Firebase Auth not available (Firebase not initialized)',
           );
           return null;
         }
 
         const auth = app.auth();
-        console.log('✅ Firebase Auth initialized successfully');
+        logger.log('Firebase Auth initialized successfully');
         return auth;
       },
-      inject: ['FIREBASE_APP'],
+      inject: [FIREBASE_APP],
     },
     {
-      provide: 'STORAGE',
+      provide: STORAGE,
       useFactory: (app: admin.app.App | null, configService: ConfigService) => {
+        const logger = new Logger('FirebaseModule');
+
         if (!app) {
-          console.warn(
-            '⚠️  Firebase Storage not available (Firebase not initialized)',
+          logger.warn(
+            'Firebase Storage not available (Firebase not initialized)',
           );
           return null;
         }
 
         const bucketName = configService.get<string>('storage.bucketName');
         const bucket = app.storage().bucket(bucketName);
-        console.log(`✅ Firebase Storage initialized with bucket: ${bucketName}`);
+        logger.log(`Firebase Storage initialized with bucket: ${bucketName}`);
         return bucket;
       },
-      inject: ['FIREBASE_APP', ConfigService],
+      inject: [FIREBASE_APP, ConfigService],
     },
   ],
-  exports: ['FIREBASE_APP', 'FIRESTORE', 'FIREBASE_AUTH', 'STORAGE'],
+  exports: [FIREBASE_APP, FIRESTORE, FIREBASE_AUTH, STORAGE],
 })
 export class FirebaseModule {}

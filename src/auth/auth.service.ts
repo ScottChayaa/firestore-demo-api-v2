@@ -13,14 +13,15 @@ import { SignInDto } from './dto/sign-in.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { GoogleSignInDto } from './dto/google-sign-in.dto';
 import { PinoLogger, InjectPinoLogger } from 'nestjs-pino';
+import { FIREBASE_APP, FIRESTORE } from '../firebase/firebase.constants';
 
 @Injectable()
 export class AuthService {
   private readonly webApiKey: string;
 
   constructor(
-    @Inject('FIREBASE_APP') private firebaseApp: admin.app.App,
-    @Inject('FIRESTORE') private firestore: admin.firestore.Firestore,
+    @Inject(FIREBASE_APP) private firebaseApp: admin.app.App,
+    @Inject(FIRESTORE) private firestore: admin.firestore.Firestore,
     private configService: ConfigService,
     private readonly logger: PinoLogger,
   ) {

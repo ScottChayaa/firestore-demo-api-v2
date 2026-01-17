@@ -5,13 +5,14 @@ import { OrderQueryDto } from '../dto/order-query.dto';
 import { CreateOrderDto } from '../dto/create-order.dto';
 import { PaginationHelper } from '../../common/pagination/pagination.helper';
 import { PaginationResult } from '../../common/pagination/pagination.interface';
+import { FIRESTORE } from '../../firebase/firebase.constants';
 
 @Injectable()
 export class OrdersRepository {
   private readonly collection: admin.firestore.CollectionReference;
 
   constructor(
-    @Inject('FIRESTORE') private readonly firestore: admin.firestore.Firestore,
+    @Inject(FIRESTORE) private readonly firestore: admin.firestore.Firestore,
   ) {
     this.collection = this.firestore.collection('orders');
   }

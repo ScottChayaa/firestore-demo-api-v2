@@ -5,11 +5,12 @@ import { ProductQueryDto } from './dto/product-query.dto';
 import { AdminProductQueryDto } from './dto/admin-product-query.dto';
 import { PaginationHelper } from '../common/pagination/pagination.helper';
 import { PaginationResult } from '../common/pagination/pagination.interface';
+import { FIRESTORE } from '../firebase/firebase.constants';
 
 @Injectable()
 export class ProductsRepository {
   constructor(
-    @Inject('FIRESTORE') private firestore: admin.firestore.Firestore,
+    @Inject(FIRESTORE) private firestore: admin.firestore.Firestore,
   ) {}
 
   /**

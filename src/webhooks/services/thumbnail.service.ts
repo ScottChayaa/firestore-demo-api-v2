@@ -2,6 +2,7 @@ import { Injectable, Inject } from '@nestjs/common';
 import { PinoLogger, InjectPinoLogger } from 'nestjs-pino';
 import { Bucket } from '@google-cloud/storage';
 import sharp from 'sharp';
+import { STORAGE } from '../../firebase/firebase.constants';
 
 type OutputFormat = 'jpeg' | 'webp';
 
@@ -55,7 +56,7 @@ export class ThumbnailService {
   private readonly SUPPORTED_EXTENSIONS = ['jpg', 'jpeg', 'png', 'webp', 'gif'];
 
   constructor(
-    @Inject('STORAGE') private readonly bucket: Bucket,
+    @Inject(STORAGE) private readonly bucket: Bucket,
     @InjectPinoLogger(ThumbnailService.name)
     private readonly logger: PinoLogger,
   ) { }

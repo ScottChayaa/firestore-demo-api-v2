@@ -5,11 +5,12 @@ import { FileQueryDto } from '../dto/file-query.dto';
 import { AdminFileQueryDto } from '../dto/admin-file-query.dto';
 import { PaginationHelper } from '../../common/pagination/pagination.helper';
 import { PaginationResult } from '../../common/pagination/pagination.interface';
+import { FIRESTORE } from '../../firebase/firebase.constants';
 
 @Injectable()
 export class FilesRepository {
   constructor(
-    @Inject('FIRESTORE') private firestore: admin.firestore.Firestore,
+    @Inject(FIRESTORE) private firestore: admin.firestore.Firestore,
   ) {}
 
   /**

@@ -4,11 +4,12 @@ import { PinoLogger, InjectPinoLogger } from 'nestjs-pino';
 import { Bucket } from '@google-cloud/storage';
 import { randomUUID } from 'crypto';
 import { GenerateUploadUrlDto } from './dto/generate-upload-url.dto';
+import { STORAGE } from '../firebase/firebase.constants';
 
 @Injectable()
 export class StorageService {
   constructor(
-    @Inject('STORAGE') private readonly bucket: Bucket,
+    @Inject(STORAGE) private readonly bucket: Bucket,
     private readonly configService: ConfigService,
     @InjectPinoLogger(StorageService.name) private readonly logger: PinoLogger,
   ) {}

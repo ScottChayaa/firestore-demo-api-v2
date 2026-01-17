@@ -7,11 +7,12 @@ import {
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import * as admin from 'firebase-admin';
+import { FIREBASE_AUTH } from '../../firebase/firebase.constants';
 
 @Injectable()
 export class FirebaseAuthGuard implements CanActivate {
   constructor(
-    @Inject('FIREBASE_AUTH') private auth: admin.auth.Auth,
+    @Inject(FIREBASE_AUTH) private auth: admin.auth.Auth,
     private reflector: Reflector,
   ) {}
 

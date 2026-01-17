@@ -4,13 +4,14 @@ import { Member } from '../entities/member.entity';
 import { MemberQueryDto } from '../dto/member-query.dto';
 import { PaginationHelper } from '../../common/pagination/pagination.helper';
 import { PaginationResult } from '../../common/pagination/pagination.interface';
+import { FIRESTORE } from '../../firebase/firebase.constants';
 
 @Injectable()
 export class MembersRepository {
   private readonly collection: admin.firestore.CollectionReference;
 
   constructor(
-    @Inject('FIRESTORE') private readonly firestore: admin.firestore.Firestore,
+    @Inject(FIRESTORE) private readonly firestore: admin.firestore.Firestore,
   ) {
     this.collection = this.firestore.collection('members');
   }

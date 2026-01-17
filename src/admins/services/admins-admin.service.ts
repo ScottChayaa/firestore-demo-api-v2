@@ -13,11 +13,12 @@ import { UpdateAdminDto } from '../dto/update-admin.dto';
 import { AdminQueryDto } from '../dto/admin-query.dto';
 import { Admin } from '../entities/admin.entity';
 import { PaginationResult } from '../../common/pagination/pagination.interface';
+import { FIREBASE_AUTH } from '../../firebase/firebase.constants';
 
 @Injectable()
 export class AdminsAdminService {
   constructor(
-    @Inject('FIREBASE_AUTH') private readonly auth: admin.auth.Auth,
+    @Inject(FIREBASE_AUTH) private readonly auth: admin.auth.Auth,
     private readonly adminsRepo: AdminsRepository,
   ) {}
 
