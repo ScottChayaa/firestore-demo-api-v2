@@ -35,17 +35,17 @@ import {
           );
 
           if (credentialsBase64) {
-            logger.info('Loading Firebase credentials from Base64 environment variable');
+            logger.info('已從 env 讀取 Firebas Base64 憑證');
             credentials = JSON.parse(
               Buffer.from(credentialsBase64, 'base64').toString('utf-8'),
             );
           } else if (credentialsPath) {
-            logger.info(`Loading Firebase credentials from file: ${credentialsPath}`);
+            logger.info(`已從檔案: ${credentialsPath} 讀取 Firebase 憑證`);
             const credentialsFile = readFileSync(credentialsPath, 'utf-8');
             credentials = JSON.parse(credentialsFile);
           } else {
             logger.warn(
-              'Firebase credentials not found (set GOOGLE_CREDENTIALS_BASE64 or GOOGLE_CREDENTIALS_PATH)',
+              '找不到 Firebase 憑證 (請設定 GOOGLE_CREDENTIALS_BASE64 或 GOOGLE_CREDENTIALS_PATH)',
             );
             return null;
           }
@@ -57,7 +57,7 @@ import {
             databaseURL: `https://${projectId}.firebaseio.com`,
           });
         } catch (error) {
-          logger.error({ err: error }, 'Failed to initialize Firebase Admin SDK');
+          logger.error({ err: error }, 'Firebase Admin SDK 初始化失敗');
           return null;
         }
       },
@@ -69,7 +69,7 @@ import {
         logger.setContext('FirebaseModule');
 
         if (!app) {
-          logger.warn('Firestore not available (Firebase not initialized)');
+          logger.warn('Firestore 異常 (Firebase 尚未初始化)');
           return null;
         }
 
@@ -82,9 +82,9 @@ import {
             databaseId,
             ignoreUndefinedProperties: true,  // 全域忽略 undefined (create 資料時忽略 undefined 參數)
           });
-          logger.info(`Firestore connected to database: ${databaseId}`);
+          logger.info(`初始化 Firestore DB 連線 : ${databaseId}`);
         } else {
-          logger.info('Firestore connected to (default) database');
+          logger.info('初始化 Firestore DB 連線 : (default)');
         }
 
         return db;
@@ -98,13 +98,13 @@ import {
 
         if (!app) {
           logger.warn(
-            'Firebase Auth not available (Firebase not initialized)',
+            'Firebase Auth 異常 (Firebase 尚未初始化)',
           );
           return null;
         }
 
         const auth = app.auth();
-        logger.info('Firebase Auth initialized successfully');
+        logger.info('Firebase Auth 已初始化');
         return auth;
       },
       inject: [FIREBASE_APP, PinoLogger],
@@ -116,14 +116,14 @@ import {
 
         if (!app) {
           logger.warn(
-            'Firebase Storage not available (Firebase not initialized)',
+            'Firebase Storage 異常 (Firebase 尚未初始化)',
           );
           return null;
         }
 
         const bucketName = configService.get<string>('storage.bucketName');
         const bucket = app.storage().bucket(bucketName);
-        logger.info(`Firebase Storage initialized with bucket: ${bucketName}`);
+        logger.info(`Firebase Storage 已初始化 bucket: ${bucketName}`);
         return bucket;
       },
       inject: [FIREBASE_APP, ConfigService, PinoLogger],
