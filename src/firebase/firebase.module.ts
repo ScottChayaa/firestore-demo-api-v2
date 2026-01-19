@@ -7,7 +7,9 @@ import {
   FIREBASE_APP,
   FIRESTORE,
   FIREBASE_AUTH,
-  STORAGE,
+  STORAGE_TEMP,
+  STORAGE_MAIN,
+  STORAGE_EVENTARC,
 } from './firebase.constants';
 
 /**
@@ -110,25 +112,57 @@ import {
       inject: [FIREBASE_APP, PinoLogger],
     },
     {
-      provide: STORAGE,
+      provide: STORAGE_TEMP,
       useFactory: (app: admin.app.App | null, configService: ConfigService, logger: PinoLogger) => {
         logger.setContext('FirebaseModule');
 
         if (!app) {
-          logger.warn(
-            'Firebase Storage 異常 (Firebase 尚未初始化)',
-          );
+          logger.warn('Firebase Storage 異常 (Firebase 尚未初始化)');
           return null;
         }
 
-        const bucketName = configService.get<string>('storage.bucketName');
+        const bucketName = configService.get<string>('storage.bucketTemp');
         const bucket = app.storage().bucket(bucketName);
-        logger.info(`Firebase Storage 已初始化 bucket: ${bucketName}`);
+        logger.info(`Storage TEMP 已初始化: ${bucketName}`);
+        return bucket;
+      },
+      inject: [FIREBASE_APP, ConfigService, PinoLogger],
+    },
+    {
+      provide: STORAGE_MAIN,
+      useFactory: (app: admin.app.App | null, configService: ConfigService, logger: PinoLogger) => {
+        logger.setContext('FirebaseModule');
+
+        if (!app) {
+          logger.warn('Firebase Storage 異常 (Firebase 尚未初始化)');
+          return null;
+        }
+
+        const bucketName = configService.get<string>('storage.bucketMain');
+        const bucket = app.storage().bucket(bucketName);
+        logger.info(`Storage MAIN 已初始化: ${bucketName}`);
+        return bucket;
+      },
+      inject: [FIREBASE_APP, ConfigService, PinoLogger],
+    },
+    {
+      provide: STORAGE_EVENTARC,
+      useFactory: (app: admin.app.App | null, configService: ConfigService, logger: PinoLogger) => {
+        logger.setContext('FirebaseModule');
+
+        if (!app) {
+          logger.warn('Firebase Storage 異常 (Firebase 尚未初始化)');
+          return null;
+        }
+
+        const bucketName = configService.get<string>('storage.bucketEventarc');
+        const bucket = app.storage().bucket(bucketName);
+        logger.info(`Storage EVENTARC 已初始化: ${bucketName}`);
         return bucket;
       },
       inject: [FIREBASE_APP, ConfigService, PinoLogger],
     },
   ],
-  exports: [FIREBASE_APP, FIRESTORE, FIREBASE_AUTH, STORAGE],
+  exports: [FIREBASE_APP, FIRESTORE, FIREBASE_AUTH, STORAGE_TEMP, STORAGE_MAIN, STORAGE_EVENTARC],
 })
 export class FirebaseModule {}

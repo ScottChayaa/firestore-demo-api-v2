@@ -2,7 +2,7 @@ import { Injectable, Inject } from '@nestjs/common';
 import { PinoLogger, InjectPinoLogger } from 'nestjs-pino';
 import { Bucket } from '@google-cloud/storage';
 import sharp from 'sharp';
-import { STORAGE } from '../../firebase/firebase.constants';
+import { STORAGE_MAIN, STORAGE_EVENTARC } from '../../firebase/firebase.constants';
 
 type OutputFormat = 'jpeg' | 'webp';
 
@@ -14,10 +14,6 @@ interface ThumbnailConfig {
 }
 
 interface ThumbnailSettings {
-  /**
-   * 要處理的來源資料夾
-   */
-  sourceFolders: string[];
   /**
    * 輸出格式: 'jpeg' | 'webp'
    */
@@ -36,7 +32,6 @@ interface ThumbnailSettings {
 export class ThumbnailService {
   // 縮圖設定
   private readonly settings: ThumbnailSettings = {
-    sourceFolders: ['uploads'],
     outputFormat: 'webp',
     outputQuality: 80,
     sizes: [
@@ -56,13 +51,16 @@ export class ThumbnailService {
   private readonly SUPPORTED_EXTENSIONS = ['jpg', 'jpeg', 'png', 'webp', 'gif'];
 
   constructor(
-    @Inject(STORAGE) private readonly bucket: Bucket,
+    @Inject(STORAGE_MAIN) private readonly bucketMain: Bucket,
+    @Inject(STORAGE_EVENTARC) private readonly bucketEventarc: Bucket,
     @InjectPinoLogger(ThumbnailService.name)
     private readonly logger: PinoLogger,
   ) { }
 
   /**
-   * 檢查檔案是否為可處理的資料夾
+   * 檢查檔案是否為可處理的來源
+   * 在三 bucket 架構中，整個 MAIN bucket 都是來源，不需要檢查資料夾
+   * 只需要排除 thumbs/ 資料夾（防止無限迴圈，雖然在新架構中不應該出現）
    */
   isProcessableFolder(filePath: string): boolean {
     // 跳過已在 thumbs 資料夾的檔案（防止無限迴圈）
@@ -70,14 +68,7 @@ export class ThumbnailService {
       return false;
     }
 
-    // 檢查是否在允許的來源資料夾中
-    const isInSourceFolder = this.settings.sourceFolders.some((folder) =>
-      filePath.startsWith(`${folder}/`),
-    );
-    if (!isInSourceFolder) {
-      return false;
-    }
-
+    // 在三 bucket 架構中，MAIN bucket 的所有檔案都是可處理的來源
     return true;
   }
 
@@ -97,12 +88,13 @@ export class ThumbnailService {
 
   /**
    * 產生縮圖
+   * 從 MAIN bucket 讀取原圖，縮圖上傳到 EVENTARC bucket
    */
   async generateThumbnails(filePath: string): Promise<void> {
-    this.logger.info(`開始產生縮圖: ${filePath}`);
+    this.logger.info(`開始產生縮圖: MAIN:${filePath}`);
 
-    // 下載原始檔案
-    const file = this.bucket.file(filePath);
+    // 從 MAIN bucket 下載原始檔案
+    const file = this.bucketMain.file(filePath);
     const [buffer] = await file.download();
 
     const thumbnails: string[] = [];
@@ -114,8 +106,8 @@ export class ThumbnailService {
       // 縮放圖片並轉換格式
       const resizedBuffer = await this.processImage(buffer, config);
 
-      // 上傳縮圖
-      const thumbnailFile = this.bucket.file(thumbnailPath);
+      // 上傳縮圖到 EVENTARC bucket
+      const thumbnailFile = this.bucketEventarc.file(thumbnailPath);
       await thumbnailFile.save(resizedBuffer, {
         contentType: this.getContentType(),
         metadata: {
@@ -126,7 +118,7 @@ export class ThumbnailService {
 
       thumbnails.push(thumbnailPath);
       this.logger.info(
-        `${config.name} 縮圖建立完成 : ${thumbnailPath}`,
+        `${config.name} 縮圖建立完成 : EVENTARC:${thumbnailPath}`,
       );
     }
 
@@ -170,17 +162,16 @@ export class ThumbnailService {
 
   /**
    * 產生縮圖路徑
-   * 範例: uploads/product/202601/uuid-file.jpg -> thumbs/small/uploads/product/202601/uuid-file.webp
+   * 範例: product/202601/uuid-file.jpg -> thumbs/small/product/202601/uuid-file.webp
+   * 注意：在三 bucket 架構中，不再有 uploads/ 前綴
    */
   private generateThumbnailPath(originalPath: string, sizeName: string): string {
-    const relativePath = originalPath;
-
     // 替換副檔名
-    const lastDotIndex = relativePath.lastIndexOf('.');
+    const lastDotIndex = originalPath.lastIndexOf('.');
     const pathWithoutExt =
-      lastDotIndex === -1 ? relativePath : relativePath.substring(0, lastDotIndex);
+      lastDotIndex === -1 ? originalPath : originalPath.substring(0, lastDotIndex);
 
-    // 組合新路徑: thumbs/{size}/{sourceFolders}/{relativePath}.{ext}
+    // 組合新路徑: thumbs/{size}/{entity}/{YYYYMM}/{uuid-file}.{ext}
     return `thumbs/${sizeName}/${pathWithoutExt}.${this.getOutputExtension()}`;
   }
 }

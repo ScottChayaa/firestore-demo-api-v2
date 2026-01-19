@@ -19,8 +19,15 @@ export default () => {
     ...process.env,
   };
 
-  if (!config.GCS_BUCKET_NAME) {
-    throw new Error('env.GCS_BUCKET_NAME 沒有設定');
+  // 驗證三個 Bucket 環境變數
+  if (!config.GCS_BUCKET_TEMP) {
+    throw new Error('env.GCS_BUCKET_TEMP 沒有設定');
+  }
+  if (!config.GCS_BUCKET) {
+    throw new Error('env.GCS_BUCKET 沒有設定');
+  }
+  if (!config.GCS_BUCKET_EVENTARC) {
+    throw new Error('env.GCS_BUCKET_EVENTARC 沒有設定');
   }
 
   return {
@@ -87,17 +94,17 @@ export default () => {
       productsCount: parseInt(config.SEED_PRODUCTS_COUNT, 10) || 10,
     },
 
-    // Google Cloud Storage Configuration
+    // Google Cloud Storage Configuration（三 Bucket 架構）
     storage: {
-      bucketName: config.GCS_BUCKET_NAME,
+      bucketTemp: config.GCS_BUCKET_TEMP,      // 暫存 Bucket（前端上傳）
+      bucketMain: config.GCS_BUCKET,            // 正式 Bucket（Eventarc 觸發源）
+      bucketEventarc: config.GCS_BUCKET_EVENTARC, // Eventarc Bucket（縮圖產物）
       signedUrlExpiresMinutes: parseInt(config.GCS_SIGNED_URL_EXPIRES_MINUTES, 10) || 15,
 
       // 檔案大小限制策略（JSON 格式，支援針對不同分類設定不同限制）
       fileSizeLimits: config.GCS_FILE_SIZE_LIMITS
         ? JSON.parse(config.GCS_FILE_SIZE_LIMITS)
         : null,
-        
-      filePathPrefix: config.GCS_FILE_PATH_PREFIX || 'uploads',
     },
   };
 };

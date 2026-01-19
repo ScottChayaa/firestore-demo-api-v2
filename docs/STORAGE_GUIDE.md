@@ -26,7 +26,29 @@
 ### 技術架構
 
 ```
-前端 → 後端 API (生成 Signed URL) → 前端直接上傳到 GCS → CDN 提供訪問
+前端 → 後端 API (生成 Signed URL) → 前端直接上傳到 GCS TEMP Bucket → CDN 提供訪問
+業務 API (建立/更新資源) → 檔案從 TEMP 移動到 MAIN Bucket → Eventarc 觸發縮圖生成 → 縮圖存到 EVENTARC Bucket
+```
+
+### 三 Bucket 架構
+
+本專案採用三個獨立 Bucket 的架構：
+
+| Bucket | 用途 | 說明 |
+|--------|------|------|
+| `GCS_BUCKET_TEMP` | 前端上傳暫存 | Signed URL 指向此 bucket，建議設定 1 天生命週期自動清理 |
+| `GCS_BUCKET` | 正式儲存 | 業務資源確認後移動到此，Eventarc 監聽此 bucket |
+| `GCS_BUCKET_EVENTARC` | 縮圖產物 | 縮圖及其他事件處理產物存放於此 |
+
+```
+firestore-demo-api-v2-temp/
+└── {entity}/{YYYYMM}/{uuid}-{file}           # 暫存
+
+firestore-demo-api-v2/
+└── {entity}/{YYYYMM}/{uuid}-{file}           # 正式（Eventarc 觸發源）
+
+firestore-demo-api-v2-event/
+└── thumbs/{size}/{entity}/{YYYYMM}/{...}     # 縮圖
 ```
 
 ---
@@ -35,33 +57,37 @@
 
 ### 1. GCS Bucket 設定
 
-#### 建立 Storage Bucket
+#### 建立 Storage Buckets
 
-1. 前往 [Firebase Console](https://console.firebase.google.com/)
-2. 選擇專案 → Storage
-3. 點擊「開始使用」，建立預設 Bucket
-
-預設 Bucket 名稱格式：`{project-id}.appspot.com`
+```bash
+# 建立三個 Bucket
+gcloud storage buckets create gs://firestore-demo-api-v2-temp --location=us-west1 --storage-class=standard
+gcloud storage buckets create gs://firestore-demo-api-v2 --location=us-west1 --storage-class=standard
+gcloud storage buckets create gs://firestore-demo-api-v2-event --location=us-west1 --storage-class=standard
+```
 
 #### 配置 CORS 規則
 
-在 GCP Console 中設定 CORS，允許前端直接上傳：
+**重要**：CORS 需設定在 TEMP Bucket（前端上傳目標）：
 
 ```bash
 # 建立 cors.json
 cat > cors.json <<EOF
 [
   {
-    "origin": ["*"],
+    "origin": ["https://your-vue-app.web.app", "http://localhost:8080"],
     "method": ["GET", "PUT"],
-    "responseHeader": ["Content-Type"],
+    "responseHeader": ["Content-Type", "x-goog-acl"],
     "maxAgeSeconds": 3600
   }
 ]
 EOF
 
-# 套用 CORS 設定
-gsutil cors set cors.json gs://YOUR_BUCKET_NAME
+# 關於 x-goog-acl
+這是前端 html 使用 PUT 方法將檔案直接上傳到 GCS 時使用
+
+# 套用 CORS 設定到 TEMP Bucket
+gcloud storage buckets update gs://firestore-demo-api-v2-temp --cors-file=cors.json
 ```
 
 ### 2. 環境變數設定
@@ -69,19 +95,21 @@ gsutil cors set cors.json gs://YOUR_BUCKET_NAME
 複製 `.env.example` 到 `.env` 並填寫以下變數：
 
 ```bash
-# Google Cloud Storage Configuration
-GCS_BUCKET_NAME=your-project.appspot.com
+# Google Cloud Storage Configuration（三 Bucket 架構）
+GCS_BUCKET_TEMP=firestore-demo-api-v2-temp
+GCS_BUCKET=firestore-demo-api-v2
+GCS_BUCKET_EVENTARC=firestore-demo-api-v2-event
 GCS_SIGNED_URL_EXPIRES_MINUTES=15
-GCS_FILE_PATH_PREFIX=uploads
 ```
 
 **參數說明**：
 
-| 變數 | 說明 | 預設值 |
+| 變數 | 說明 | 範例值 |
 |------|------|--------|
-| `GCS_BUCKET_NAME` | GCS Bucket 名稱 | `{project-id}.appspot.com` |
+| `GCS_BUCKET_TEMP` | 暫存 Bucket（前端上傳） | `firestore-demo-api-v2-temp` |
+| `GCS_BUCKET` | 正式 Bucket（Eventarc 觸發源） | `firestore-demo-api-v2` |
+| `GCS_BUCKET_EVENTARC` | Eventarc Bucket（縮圖產物） | `firestore-demo-api-v2-event` |
 | `GCS_SIGNED_URL_EXPIRES_MINUTES` | Signed URL 有效期限（分鐘） | `15` |
-| `GCS_FILE_PATH_PREFIX` | 檔案路徑前綴 | `uploads` |
 
 ### 3. Firebase 權限設定
 
@@ -126,8 +154,8 @@ GCS_FILE_PATH_PREFIX=uploads
 ```json
 {
   "uploadUrl": "https://storage.googleapis.com/...",
-  "filePath": "uploads/products/2026/01/a1b2c3d4-5678-90ab-cdef-1234567890ab-product-image.jpg",
-  "cdnUrl": "https://storage.googleapis.com/your-bucket/uploads/...",
+  "filePath": "product/202601/a1b2c3d4-5678-90ab-cdef-1234567890ab-product-image.jpg",
+  "cdnUrl": "https://storage.googleapis.com/firestore-demo-api-v2-temp/product/202601/...",
   "expiresAt": "2026-01-07T16:00:00Z"
 }
 ```
@@ -156,7 +184,7 @@ curl -X POST http://localhost:8080/api/storage/generate-upload-url \
 
 ```json
 {
-  "filePath": "uploads/products/2026/01/a1b2c3d4-5678-90ab-cdef-1234567890ab-product-image.jpg"
+  "filePath": "product/202601/a1b2c3d4-5678-90ab-cdef-1234567890ab-product-image.jpg"
 }
 ```
 
@@ -165,7 +193,7 @@ curl -X POST http://localhost:8080/api/storage/generate-upload-url \
 ```json
 {
   "message": "檔案已刪除",
-  "filePath": "uploads/products/2026/01/..."
+  "filePath": "product/202601/..."
 }
 ```
 
@@ -176,7 +204,7 @@ curl -X DELETE http://localhost:8080/api/storage/files \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_ADMIN_TOKEN" \
   -d '{
-    "filePath": "uploads/products/2026/01/test.jpg"
+    "filePath": "product/202601/test.jpg"
   }'
 ```
 
@@ -416,7 +444,6 @@ async function createProductWithImage(productData, imageFile, adminToken) {
 
 **暫時方案**：
 1. 手動到 Firebase Console → Storage 刪除
-2. 或使用 gsutil 工具批次清理
 
 **長期方案**（可選）：
 - 實作檔案使用追蹤機制
@@ -438,25 +465,33 @@ async function createProductWithImage(productData, imageFile, adminToken) {
 
 ## 檔案路徑結構
 
-系統自動組織檔案路徑，格式為：
+系統使用三個獨立 Bucket，檔案路徑格式為：
 
 ```
-{prefix}/{category}/{year}/{month}/{uuid}-{fileName}
+{entity}/{YYYYMM}/{uuid}-{fileName}
 ```
 
 **範例**：
 
 ```
-uploads/products/2026/01/a1b2c3d4-5678-90ab-cdef-1234567890ab-macbook-pro.jpg
-uploads/members/2026/01/b2c3d4e5-6789-01bc-def1-234567890abc-avatar.png
-uploads/orders/2026/01/c3d4e5f6-7890-12cd-ef12-345678901bcd-receipt.jpg
+# TEMP Bucket (前端上傳暫存)
+firestore-demo-api-v2-temp/product/202601/a1b2c3d4-5678-90ab-cdef-1234567890ab-macbook-pro.jpg
+
+# MAIN Bucket (正式儲存)
+firestore-demo-api-v2/product/202601/a1b2c3d4-5678-90ab-cdef-1234567890ab-macbook-pro.jpg
+
+# EVENTARC Bucket (縮圖)
+firestore-demo-api-v2-event/thumbs/small/product/202601/a1b2c3d4-5678-90ab-cdef-1234567890ab-macbook-pro.webp
+firestore-demo-api-v2-event/thumbs/medium/product/202601/a1b2c3d4-5678-90ab-cdef-1234567890ab-macbook-pro.webp
+firestore-demo-api-v2-event/thumbs/large/product/202601/a1b2c3d4-5678-90ab-cdef-1234567890ab-macbook-pro.webp
 ```
 
 **優點**：
 - 按時間組織，方便管理和清理
 - UUID 避免檔名衝突
 - 保留原始檔名（截斷過長）
-- 支援未來多類別擴展
+- 三 Bucket 架構分離關注點：暫存、正式、事件處理產物
+- TEMP Bucket 可設定生命週期自動清理孤立檔案
 
 ---
 
@@ -484,20 +519,25 @@ Body: {
 
 ### 3. 自動清理
 
-設定 GCS 生命週期規則：
+為 TEMP Bucket 設定 GCS 生命週期規則（建議 1 天後自動刪除）：
 
-```json
+```bash
+# 建立 lifecycle.json
+cat > lifecycle.json <<EOF
 {
   "lifecycle": {
     "rule": [{
       "action": {"type": "Delete"},
       "condition": {
-        "age": 30,
-        "matchesPrefix": ["uploads/temp/"]
+        "age": 1
       }
     }]
   }
 }
+EOF
+
+# 套用生命週期規則到 TEMP Bucket
+gcloud storage buckets update gs://firestore-demo-api-v2-temp --lifecycle-file=lifecycle.json
 ```
 
 ---

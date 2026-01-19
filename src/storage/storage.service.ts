@@ -4,18 +4,21 @@ import { PinoLogger, InjectPinoLogger } from 'nestjs-pino';
 import { Bucket } from '@google-cloud/storage';
 import { randomUUID } from 'crypto';
 import { GenerateUploadUrlDto } from './dto/generate-upload-url.dto';
-import { STORAGE } from '../firebase/firebase.constants';
+import { STORAGE_TEMP, STORAGE_MAIN } from '../firebase/firebase.constants';
+
+export type BucketType = 'temp' | 'main' | 'eventarc';
 
 @Injectable()
 export class StorageService {
   constructor(
-    @Inject(STORAGE) private readonly bucket: Bucket,
+    @Inject(STORAGE_TEMP) private readonly bucketTemp: Bucket,
+    @Inject(STORAGE_MAIN) private readonly bucketMain: Bucket,
     private readonly configService: ConfigService,
     @InjectPinoLogger(StorageService.name) private readonly logger: PinoLogger,
   ) {}
 
   /**
-   * 生成上傳用的 Signed URL
+   * 生成上傳用的 Signed URL（使用 TEMP bucket）
    */
   async generateUploadUrl(dto: GenerateUploadUrlDto): Promise<{
     uploadUrl: string;
@@ -26,11 +29,11 @@ export class StorageService {
     // 1. 驗證檔案類型和大小
     this.validateFile(dto);
 
-    // 2. 生成檔案路徑
+    // 2. 生成檔案路徑（不需要 temp/ 前綴，因為整個 bucket 就是暫存）
     const filePath = this.generateFilePath(dto);
 
-    // 3. 取得 GCS File 物件
-    const file = this.bucket.file(filePath);
+    // 3. 取得 TEMP bucket 的 GCS File 物件
+    const file = this.bucketTemp.file(filePath);
 
     // 4. 生成 Signed URL
     const expiresMinutes = this.configService.get<number>('storage.signedUrlExpiresMinutes');
@@ -43,10 +46,10 @@ export class StorageService {
       contentType: dto.contentType,
     });
 
-    // 5. 生成 CDN URL
-    const cdnUrl = this.getCdnUrl(filePath);
+    // 5. 生成 CDN URL（指向 TEMP bucket）
+    const cdnUrl = this.getCdnUrl(filePath, 'temp');
 
-    this.logger.info({ filePath, expiresAt }, '生成上傳 URL 成功');
+    this.logger.info({ filePath, expiresAt }, '生成上傳 URL 成功 (TEMP bucket)');
 
     return {
       uploadUrl: signedUrl,
@@ -58,9 +61,12 @@ export class StorageService {
 
   /**
    * 刪除檔案
+   * @param filePath 檔案路徑
+   * @param bucketType 指定 bucket（預設 main）
    */
-  async deleteFile(filePath: string): Promise<void> {
-    const file = this.bucket.file(filePath);
+  async deleteFile(filePath: string, bucketType: BucketType = 'main'): Promise<void> {
+    const bucket = bucketType === 'temp' ? this.bucketTemp : this.bucketMain;
+    const file = bucket.file(filePath);
 
     // 檢查檔案是否存在
     const [exists] = await file.exists();
@@ -69,35 +75,38 @@ export class StorageService {
     }
 
     await file.delete();
-    this.logger.info({ filePath }, '檔案刪除成功');
+    this.logger.info({ filePath, bucketType }, '檔案刪除成功');
   }
 
   /**
-   * 將檔案從暫存區移動到正式區
-   * @param tempFilePath 暫存區檔案路徑（temp/...）
-   * @returns 正式區檔案路徑（uploads/...）
+   * 將檔案從暫存區移動到正式區（跨 bucket 複製）
+   * @param tempFilePath 暫存區檔案路徑（在 TEMP bucket 中）
+   * @returns 正式區檔案路徑（在 MAIN bucket 中，路徑相同）
    */
   async moveFromTempToPermanent(tempFilePath: string): Promise<string> {
-    // 1. 檢查暫存檔案是否存在
-    const tempFile = this.bucket.file(tempFilePath);
+    // 1. 檢查暫存檔案是否存在（在 TEMP bucket）
+    const tempFile = this.bucketTemp.file(tempFilePath);
     const [exists] = await tempFile.exists();
 
     if (!exists) {
       throw new NotFoundException(`暫存檔案不存在: ${tempFilePath}`);
     }
 
-    // 2. 生成正式路徑（將 temp/ 替換為 uploads/）
-    const permanentFilePath = tempFilePath.replace(/^temp\//, 'uploads/');
-    const permanentFile = this.bucket.file(permanentFilePath);
+    // 2. 正式路徑與暫存路徑相同（只是在不同 bucket）
+    const permanentFilePath = tempFilePath;
+    const permanentFile = this.bucketMain.file(permanentFilePath);
 
-    // 3. 複製檔案到正式區
+    // 3. 跨 bucket 複製檔案（TEMP → MAIN）
     await tempFile.copy(permanentFile);
 
     // 4. 刪除暫存檔案
     await tempFile.delete();
 
     this.logger.info(
-      { from: tempFilePath, to: permanentFilePath },
+      {
+        from: `TEMP:${tempFilePath}`,
+        to: `MAIN:${permanentFilePath}`
+      },
       '檔案已移動到正式區',
     );
 
@@ -105,36 +114,73 @@ export class StorageService {
   }
 
   /**
-   * 生成檔案路徑（暫存區）
-   * 格式: temp/{entity}/{year}{month}/{uuid}-{sanitizedFileName}
+   * 生成檔案路徑
+   * 格式: {entity}/{YYYYMM}/{uuid}-{sanitizedFileName}
+   * 注意：不再需要 temp/ 或 uploads/ 前綴，因為使用獨立 bucket
    */
   private generateFilePath(dto: GenerateUploadUrlDto): string {
-    const prefix = 'temp'; // 使用暫存區
     const now = new Date();
     const year = now.getFullYear();
     const month = String(now.getMonth() + 1).padStart(2, '0');
     const uuid = randomUUID();
     const sanitizedFileName = this.sanitizeFileName(dto.fileName);
 
-    return `${prefix}/${dto.entity}/${year}${month}/${uuid}-${sanitizedFileName}`;
+    return `${dto.entity}/${year}${month}/${uuid}-${sanitizedFileName}`;
   }
 
   /**
    * 取得 CDN URL
+   * @param filePath 檔案路徑
+   * @param bucketType 指定 bucket（預設 main）
    */
-  getCdnUrl(filePath: string): string {
-    const bucketName = this.configService.get<string>('storage.bucketName');
+  getCdnUrl(filePath: string, bucketType: BucketType = 'main'): string {
+    let bucketName: string;
+
+    switch (bucketType) {
+      case 'temp':
+        bucketName = this.configService.get<string>('storage.bucketTemp');
+        break;
+      case 'eventarc':
+        bucketName = this.configService.get<string>('storage.bucketEventarc');
+        break;
+      case 'main':
+      default:
+        bucketName = this.configService.get<string>('storage.bucketMain');
+        break;
+    }
+
     return `https://storage.googleapis.com/${bucketName}/${filePath}`;
   }
 
   /**
-   * 從 CDN URL 提取檔案路徑
-   * @param url CDN URL (https://storage.googleapis.com/bucket-name/temp/product/202601/uuid-file.jpg)
-   * @returns filePath (temp/product/202601/uuid-file.jpg)
+   * 從 CDN URL 提取檔案路徑和 bucket 類型
+   * @param url CDN URL (https://storage.googleapis.com/bucket-name/entity/202601/uuid-file.jpg)
+   * @returns { filePath, bucketType }
    */
-  extractFilePathFromUrl(url: string): string {
-    const match = url.match(/googleapis\.com\/[^/]+\/(.+)$/);
-    return match ? match[1] : '';
+  extractFilePathFromUrl(url: string): { filePath: string; bucketType: BucketType } {
+    const match = url.match(/googleapis\.com\/([^/]+)\/(.+)$/);
+    if (!match) {
+      return { filePath: '', bucketType: 'main' };
+    }
+
+    const bucketName = match[1];
+    const filePath = match[2];
+
+    // 判斷 bucket 類型
+    const bucketTemp = this.configService.get<string>('storage.bucketTemp');
+    const bucketMain = this.configService.get<string>('storage.bucketMain');
+    const bucketEventarc = this.configService.get<string>('storage.bucketEventarc');
+
+    let bucketType: BucketType = 'main';
+    if (bucketName === bucketTemp) {
+      bucketType = 'temp';
+    } else if (bucketName === bucketEventarc) {
+      bucketType = 'eventarc';
+    } else if (bucketName === bucketMain) {
+      bucketType = 'main';
+    }
+
+    return { filePath, bucketType };
   }
 
   /**

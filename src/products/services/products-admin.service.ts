@@ -39,12 +39,13 @@ export class ProductsAdminService {
 
     // 如果有圖片且在暫存區，移動到正式區
     if (dto.imageUrl) {
-      const filePath = this.storageService.extractFilePathFromUrl(dto.imageUrl);
+      const { filePath, bucketType } = this.storageService.extractFilePathFromUrl(dto.imageUrl);
 
-      if (filePath.startsWith('temp/')) {
+      // 在三 bucket 架構中，檢查 URL 是否來自 TEMP bucket
+      if (bucketType === 'temp' && filePath) {
         const permanentFilePath =
           await this.storageService.moveFromTempToPermanent(filePath);
-        finalImageUrl = this.storageService.getCdnUrl(permanentFilePath);
+        finalImageUrl = this.storageService.getCdnUrl(permanentFilePath, 'main');
 
         this.logger.info(
           { tempPath: filePath, permanentPath: permanentFilePath },
