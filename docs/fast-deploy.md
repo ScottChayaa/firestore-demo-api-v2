@@ -68,8 +68,41 @@ gcloud run revisions list \
 # 查看當前生產版本（正在服務的版本）
 gcloud run services describe firestore-demo-api \
   --region us-west1 \
-  --format="value(status.latestReadyRevisionName)"
+  --format="value(status.latestReadyRevisionNsame)"
 
 # 查看特定 revision 的詳細資訊
 gcloud run revisions describe firestore-demo-api-00008-8t6 --region us-west1
 ```
+
+
+**GCS cli**
+
+```bash
+# 建立 3 Bucket 架構
+gcloud storage buckets create gs://firestore-demo-api-v2-temp --location=us-west1 --default-storage-class=standard
+gcloud storage buckets create gs://firestore-demo-api-v2 --location=us-west1 --default-storage-class=standard
+gcloud storage buckets create gs://firestore-demo-api-v2-eventarc --location=us-west1 --default-storage-class=standard
+
+# 更新 cors
+gcloud storage buckets update gs://firestore-demo-api-v2-temp --cors-file=gcs-cors.json
+gcloud storage buckets update gs://firestore-demo-api-v2 --cors-file=gcs-cors.json
+gcloud storage buckets update gs://firestore-demo-api-v2-eventarc --cors-file=gcs-cors.json
+
+# 更新 lifecycle
+#   temp bucket 的檔案會 1 天後自動刪除
+gcloud storage buckets update gs://firestore-demo-api-v2-temp --lifecycle-file=gcs-lifecycle.json
+
+# 確認 cors 設定資訊
+gcloud storage buckets describe gs://firestore-demo-api-v2-temp --format="default(cors_config)"
+gcloud storage buckets describe gs://firestore-demo-api-v2 --format="default(cors_config)"
+gcloud storage buckets describe gs://firestore-demo-api-v2-eventarc --format="default(cors_config)"
+
+# 將整個 Bucket 設為公開（適合圖片伺服器）
+gcloud storage buckets add-iam-policy-binding gs://firestore-demo-api-v2-temp --member="allUsers" --role="roles/storage.objectViewer"
+gcloud storage buckets add-iam-policy-binding gs://firestore-demo-api-v2 --member="allUsers" --role="roles/storage.objectViewer"
+gcloud storage buckets add-iam-policy-binding gs://firestore-demo-api-v2-eventarc --member="allUsers" --role="roles/storage.objectViewer"
+
+# 確認是否設定為公開 (檢查IAM)
+gcloud storage buckets get-iam-policy gs://firestore-demo-api-v2-temp
+```
+
